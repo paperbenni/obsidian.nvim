@@ -230,6 +230,14 @@ util.is_img = function(s)
   return false
 end
 
+---Checks if a given string represents a PDF file based on its suffix.
+---
+---@param s string: The input string to check.
+---@return boolean: Returns true if the string ends with .pdf, false otherwise.
+util.is_pdf = function(s)
+  return vim.endswith(s, ".pdf")
+end
+
 -- This function removes a single backslash within double square brackets
 util.unescape_single_backslash = function(text)
   return text:gsub("(%[%[[^\\]+)\\(%|[^\\]+]])", "%1%2")

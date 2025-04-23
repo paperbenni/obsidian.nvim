@@ -885,6 +885,15 @@ Client.follow_link_async = function(self, link, opts)
         return
       end
 
+      if util.is_pdf(res.location) then
+        if self.opts.follow_pdf_func ~= nil then
+          self.opts.follow_pdf_func(res.location)
+        else
+          log.warn "This looks like a PDF path. You can customize the behavior of PDF files with the 'follow_pdf_func' option."
+        end
+        return
+      end
+
       if res.link_type == search.RefTypes.Wiki or res.link_type == search.RefTypes.WikiWithAlias then
         -- Prompt to create a new note.
         if util.confirm("Create new note '" .. res.location .. "'?") then
