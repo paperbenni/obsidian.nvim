@@ -444,6 +444,13 @@ This is a complete list of all of the options that can be passed to `require("ob
     -- vim.cmd(':silent exec "!start ' .. url .. '"') -- Windows
   end,
 
+  -- Optional, by default when you use `:ObsidianFollowLink` on a link to a pdf
+  -- file it will be ignored but you can customize this behavior here.
+  ---@param pdf string
+  follow_pdf_func = function(pdf)
+    vim.ui.open(url) -- need Neovim 0.10.0+
+  end,
+
   -- Optional, set to true if you use the Obsidian Advanced URI plugin.
   -- https://github.com/Vinzent03/obsidian-advanced-uri
   use_advanced_uri = false,
