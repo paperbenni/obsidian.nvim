@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added default `image_name_func` similar to Obsidian's.
 - Added support `text/uri-list` to `ObsidianPasteImg`.
-- Added support for obsidian style `%%` comment
+- Added support for obsidian style `%%` comment.
+- Added `opts.daily_notes.workdays_only` option which, when false, adds support for weekend daily notes.
 
 ### Changed
 
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ObsidianToggleCheckbox` now works in visual mode for multiline toggle.
 - `ObsidianRename` input field is pre-filled filled with the current note id to ease renaming.
 - Improved type annotations for user commands: add `CommandArgs` type.
+- `smart_action` now can also toggle heading folds.
 
 ### Fixed
 

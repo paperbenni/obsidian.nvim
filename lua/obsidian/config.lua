@@ -380,6 +380,7 @@ end
 ---@field alias_format string|?
 ---@field template string|?
 ---@field default_tags string[]|?
+---@field workdays_only boolean
 config.DailyNotesOpts = {}
 
 --- Get defaults.
@@ -391,6 +392,7 @@ config.DailyNotesOpts.default = function()
     date_format = nil,
     alias_format = nil,
     default_tags = { "daily-notes" },
+    workdays_only = true,
   }
 end
 

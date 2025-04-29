@@ -359,7 +359,9 @@ carefully and customize it to your needs:
         -- Optional, default tags to add to each new daily note created.
         default_tags = { "daily-notes" },
         -- Optional, if you want to automatically insert a template from your template directory like 'daily.md'
-        template = nil
+        template = nil,
+        -- Optional, if you want ObsidianYesterday to return the last work day or ObsidianTomorrow to return the next work day.
+        workdays_only = true,
       },
     
       -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
@@ -389,7 +391,7 @@ carefully and customize it to your needs:
           end,
           opts = { buffer = true },
         },
-        -- Smart action depending on context: follow link, show notes with tag, or toggle checkbox.
+        -- Smart action depending on context: follow link, show notes with tag, toggle checkbox, or toggle heading fold
         ["<cr>"] = {
           action = function()
             return require("obsidian").util.smart_action()
