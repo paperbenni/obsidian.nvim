@@ -867,10 +867,13 @@ Client.follow_link_async = function(self, link, opts)
         return
       end
 
-      if util.is_img(res.location) then
+      -- Use the new ext_open module to handle all file types
+      -- This will handle both images and other external files
+      local ext_open = require "obsidian.ext_open"
+      if util.is_img(res.location) or ext_open.should_open_externally(res.location, self.opts.external_file_types) then
         local path = self.dir / res.location
-        self.opts.follow_img_func(tostring(path))
-        return
+        local success = ext_open.open_file(self, tostring(path))
+        if success then return end
       end
 
       if res.note ~= nil then

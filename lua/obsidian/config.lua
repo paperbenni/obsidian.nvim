@@ -19,6 +19,7 @@ local config = {}
 ---@field follow_img_func fun(img: string)|?
 ---@field note_frontmatter_func (fun(note: obsidian.Note): table)|?
 ---@field disable_frontmatter (fun(fname: string?): boolean)|boolean|?
+---@field external_file_types table|?
 ---@field completion obsidian.config.CompletionOpts
 ---@field mappings obsidian.config.MappingOpts
 ---@field picker obsidian.config.PickerOpts
@@ -53,6 +54,7 @@ config.ClientOpts.default = function()
     preferred_link_style = config.LinkStyle.wiki,
     follow_url_func = vim.ui.open,
     follow_img_func = vim.ui.open,
+    external_file_types = require("obsidian.ext_open").default_config,
     note_frontmatter_func = nil,
     disable_frontmatter = false,
     completion = config.CompletionOpts.default(),

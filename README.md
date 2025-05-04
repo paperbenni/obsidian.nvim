@@ -455,6 +455,24 @@ require("obsidian").setup {
     -- vim.ui.open(url, { cmd = { "loupe" } })
   end,
 
+  -- Configure external file types to be opened with an external program.
+  -- Uses vim.ui.open by default for the specified file types.
+  external_file_types = {
+    -- List of file extensions that should be opened using vim.ui.open
+    -- Images
+    "png", "jpg", "jpeg", "gif", "bmp", "svg", "webp", "ico", "heic",
+    -- Documents
+    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
+    -- Audio
+    "mp3", "wav", "ogg", "flac", "m4a",
+    -- Video
+    "mp4", "mkv", "avi", "mov", "wmv",
+    -- Archives
+    "zip", "tar", "gz", "7z", "rar",
+    -- Other
+    "exe", "dll"
+  },
+
   -- Optional, set to true if you use the Obsidian Advanced URI plugin.
   -- https://github.com/Vinzent03/obsidian-advanced-uri
   use_advanced_uri = false,
