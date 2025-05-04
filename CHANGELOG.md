@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [v3.11.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.11.0) - 2025-05-04
+
 ### Added
 
 - Added a statusline component provider similar to Obsidian app.
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved type annotations for user commands: add `CommandArgs` type.
 - `follow_url_func` and `follow_img_func` defaults to `vim.ui.open`
 - `smart_action` now can also toggle heading folds.
+- `Obsidian new_from_template` accepts an optional `TEMPLATE` argument.
 
 ### Fixed
 
@@ -33,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `<C-x>` not working after command merging
 - Fixed `blink.cmp` new notes source completion not working properly
 - Fixed `blink.cmp` off by one insert start position
+- Fixed `ObsidianNew`, `ObsidianRename`, and `ObsidianPasteImg` not to evaluate backticked substrings in its arguments, disabling `-complete=file`
 
 ## [v3.10.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.10.0) - 2025-04-12
 
@@ -51,9 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default to not activate ui render when `render-markdown.nvim` or `markview.nvim` is present
 - `smart_action` shows picker for tags (`ObsidianTag`) when cursor is on a tag
 - `ObsidianToggleCheckbox` now works with numbered lists
-
-- # `Makefile` is friendlier: self-documenting and automatically gets dependencies
-
+- `Makefile` is friendlier: self-documenting and automatically gets dependencies
 - Default to not activate ui render when `render-markdown.nvim` or `markview.nvim` is present.
 
 ### Fixed

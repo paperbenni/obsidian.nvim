@@ -63,8 +63,7 @@ extmarks for references, tags, and check-boxes.
 <https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687>
 
 
-==============================================================================
-3. Keymaps                                                  *obsidian-keymaps*
+KEYMAPS                                                     *obsidian-keymaps*
 
 These default keymaps will only be set if you are in a valid workspace and a
 markdown buffer:
@@ -97,8 +96,10 @@ COMMANDS                                                   *obsidian-commands*
     window.
 - `:Obsidian new [TITLE]` to create a new note. One optional argument: the title
     of the new note.
-- `:Obsidian new_from_template [TITLE]` to create a new note from a template in
-    the templates folder. Selecting from a list using your preferred picker.
+- `:Obsidian new_from_template [TITLE] [TEMPLATE]` to create a new note with
+    `TITLE` from a template with the name `TEMPLATE`. Both arguments are optional.
+    If not given, the template will be selected from a list using your preferred
+    picker.
 - `:Obsidian open [QUERY]` to open a note in the Obsidian app. One optional
     argument: a query used to resolve the note to open by ID, path, or alias. If
     not given, the current buffer is used.
@@ -136,7 +137,7 @@ DEMO                                                           *obsidian-demo*
 
 
 ==============================================================================
-4. 📝 Requirements                              *obsidian-📝-requirements*
+3. 📝 Requirements                              *obsidian-📝-requirements*
 
 
 SYSTEM REQUIREMENTS                             *obsidian-system-requirements*
@@ -185,7 +186,7 @@ or "requires" field of the obsidian.nvim plugin spec for your package manager.
 
 
 ==============================================================================
-5. 📥 Installation                              *obsidian-📥-installation*
+4. 📥 Installation                              *obsidian-📥-installation*
 
 To configure obsidian.nvim you just need to call `require("obsidian").setup({
 ... })` with the desired options. Here are some examples using different plugin
@@ -293,7 +294,7 @@ Click for install snippet ~
 
 
 ==============================================================================
-6. ⚙️ Configuration                        *obsidian-⚙️-configuration*
+5. ⚙️ Configuration                        *obsidian-⚙️-configuration*
 
 This is a complete list of all the options that can be passed to
 `require("obsidian").setup()`. The settings below are _not necessarily the
@@ -636,29 +637,29 @@ Click to see configuration options ~
 
 
 ==============================================================================
-7. 📖 Documentation                            *obsidian-📖-documentation*
+6. 📖 Documentation                            *obsidian-📖-documentation*
 
 See the obsidian.nvim wiki
 <https://github.com/obsidian-nvim/obsidian.nvim/wiki>
 
 
 ==============================================================================
-8. 🤝 Contributing                              *obsidian-🤝-contributing*
+7. 🤝 Contributing                              *obsidian-🤝-contributing*
 
 Please read the CONTRIBUTING
 <https://github.com/obsidian-nvim/obsidian.nvim/blob/main/CONTRIBUTING.md>
 guide before submitting a pull request.
 
-
+neo451💻Stefan Otte💻guspix💻ffricken💻
 ==============================================================================
-9. ❤️ Acknowledgement                    *obsidian-❤️-acknowledgement*
+8. ❤️ Acknowledgement                    *obsidian-❤️-acknowledgement*
 
 We would like to thank epwalsh <https://github.com/epwalsh> for creating this
 beautiful plugin. If you’re feeling especially generous, he still appreciates
 some coffee funds! <https://www.buymeacoffee.com/epwalsh>.
 
 ==============================================================================
-10. Links                                                     *obsidian-links*
+9. Links                                                      *obsidian-links*
 
 1. *See this screenshot*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/90d5f218-06cd-4ebb-b00b-b59c2f5c3cc1
 2. *See this screenshot*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687
