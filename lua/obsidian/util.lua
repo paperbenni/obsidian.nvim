@@ -222,11 +222,22 @@ end
 ---@param s string: The input string to check.
 ---@return boolean: Returns true if the string ends with a supported image suffix, false otherwise.
 util.is_img = function(s)
-  for _, suffix in ipairs { ".png", ".jpg", ".jpeg", ".heic", ".gif", ".svg", ".ico" } do
-    if vim.endswith(s, suffix) then
+  local image_extensions = {
+    "png", "jpg", "jpeg", "gif", "bmp", "svg", "webp", "ico", "heic"
+  }
+  
+  local ext = s:match("%.([^%.]+)$")
+  if not ext then 
+    return false 
+  end
+  
+  ext = ext:lower()
+  for _, img_ext in ipairs(image_extensions) do
+    if ext == img_ext then
       return true
     end
   end
+  
   return false
 end
 
