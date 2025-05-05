@@ -3,7 +3,7 @@ local completion = require "obsidian.completion.refs"
 local LinkStyle = require("obsidian.config").LinkStyle
 local obsidian = require "obsidian"
 local util = require "obsidian.util"
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 
 ---Used to track variables that are used between reusable method calls. This is required, because each
 ---call to the sources's completion hook won't create a new source object, but will reuse the same one.

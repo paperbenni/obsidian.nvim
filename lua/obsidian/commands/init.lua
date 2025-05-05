@@ -1,4 +1,4 @@
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 local log = require "obsidian.log"
 local legacycommands = require "obsidian.commands.init-legacy"
 

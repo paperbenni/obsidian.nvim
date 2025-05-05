@@ -21,7 +21,7 @@ local search = require "obsidian.search"
 local AsyncExecutor = require("obsidian.async").AsyncExecutor
 local CallbackManager = require("obsidian.callbacks").CallbackManager
 local block_on = require("obsidian.async").block_on
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 local uv = vim.uv
 
 ---@class obsidian.SearchOpts : obsidian.ABC

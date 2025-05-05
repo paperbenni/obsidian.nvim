@@ -1,5 +1,5 @@
 local util = require "obsidian.util"
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 
 local command_lookups = {
   ObsidianCheck = "obsidian.commands.check",
