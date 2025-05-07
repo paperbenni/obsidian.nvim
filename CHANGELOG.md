@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Added `makefile types` target to check types via lua-ls
+
 ### Changed
 
 - Remove `itertools.lua` in favor of `vim.iter`
+
+### Fixed
+
+- Fixed types in `_snacks.lua`
 
 ## [v3.11.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.11.0) - 2025-05-04
 

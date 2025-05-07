@@ -484,8 +484,8 @@ Click to see configuration options ~
       -- Sets how you follow images
       ---@param img string
       follow_img_func = function(img)
-        vim.ui.open(url)
-        -- vim.ui.open(url, { cmd = { "loupe" } })
+        vim.ui.open(img)
+        -- vim.ui.open(img, { cmd = { "loupe" } })
       end,
     
       -- Optional, set to true if you use the Obsidian Advanced URI plugin.
@@ -650,7 +650,7 @@ Please read the CONTRIBUTING
 <https://github.com/obsidian-nvim/obsidian.nvim/blob/main/CONTRIBUTING.md>
 guide before submitting a pull request.
 
-neo451💻Stefan Otte💻guspix💻ffricken💻
+neo451💻Stefan Otte💻guspix💻ffricken💻Erlan Rangel💻bosvik💻Jost Alemann📖Luis Garcia💻Joe💻Horia Gug💻Aquiles Gomez💻Alvaro Sevilla💻Sebastian Stark💻Jumpei Yamakawa💻marcocofano💻Jaehaks💻Magnus💻Noam Stolero💻aileot💻Rico Sta. Cruz📖
 ==============================================================================
 8. ❤️ Acknowledgement                    *obsidian-❤️-acknowledgement*
 
