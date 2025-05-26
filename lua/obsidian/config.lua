@@ -20,6 +20,7 @@ local config = {}
 ---@field note_frontmatter_func (fun(note: obsidian.Note): table)|?
 ---@field disable_frontmatter (fun(fname: string?): boolean)|boolean|?
 ---@field external_file_types table|?
+---@field backlinks obsidian.config.BacklinkOpts
 ---@field completion obsidian.config.CompletionOpts
 ---@field mappings obsidian.config.MappingOpts
 ---@field picker obsidian.config.PickerOpts
@@ -57,6 +58,7 @@ config.ClientOpts.default = function()
     external_file_types = require("obsidian.ext_open").default_config,
     note_frontmatter_func = nil,
     disable_frontmatter = false,
+    backlinks = config.BacklinkOpts.default(),
     completion = config.CompletionOpts.default(),
     mappings = config.MappingOpts.default(),
     picker = config.PickerOpts.default(),
@@ -196,11 +198,6 @@ config.ClientOpts.normalize = function(opts, defaults)
     opts.overwrite_mappings = nil
   end
 
-  if opts.backlinks ~= nil then
-    log.warn_once "The 'backlinks' config option is deprecated and no longer has any affect."
-    opts.backlinks = nil
-  end
-
   if opts.tags ~= nil then
     log.warn_once "The 'tags' config option is deprecated and no longer has any affect."
     opts.tags = nil
@@ -240,6 +237,7 @@ config.ClientOpts.normalize = function(opts, defaults)
   ---@type obsidian.config.ClientOpts
   opts = tbl_override(defaults, opts)
 
+  opts.backlinks = tbl_override(defaults.backlinks, opts.backlinks)
   opts.completion = tbl_override(defaults.completion, opts.completion)
   opts.mappings = opts.mappings and opts.mappings or defaults.mappings
   opts.picker = tbl_override(defaults.picker, opts.picker)
@@ -295,6 +293,18 @@ config.LinkStyle = {
   wiki = "wiki",
   markdown = "markdown",
 }
+
+---@class obsidian.config.BacklinkOpts
+---@field parse_headers boolean
+config.BacklinkOpts = {}
+
+--- Get defaults.
+---@return obsidian.config.BacklinkOpts
+config.BacklinkOpts.default = function()
+  return {
+    parse_headers = true,
+  }
+end
 
 ---@class obsidian.config.CompletionOpts
 ---
