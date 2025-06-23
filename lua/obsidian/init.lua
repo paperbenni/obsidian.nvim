@@ -51,20 +51,7 @@ obsidian.get_client = function()
   end
 end
 
----Print general information about the current installation of Obsidian.nvim.
-obsidian.info = function()
-  if obsidian._client == nil then
-    print(
-      "ERROR: it appears obsidian.nvim has not been setup.\n"
-        .. "Please ensure obsidian.nvim loads upfront (e.g. by setting 'lazy=false' with your plugin manager) "
-        .. "and then run this again."
-    )
-    return
-  end
-
-  local client = obsidian.get_client()
-  client:command("debug", { raw_print = true })
-end
+obsidian.register_command = require("obsidian.commands").register
 
 ---Create a new Obsidian client without additional setup.
 ---
@@ -79,7 +66,7 @@ end
 ---@param dir string
 ---@return obsidian.Client
 obsidian.new_from_dir = function(dir)
-  local opts = obsidian.config.ClientOpts.default()
+  local opts = obsidian.config.default
   opts.workspaces = { { path = dir } }
   return obsidian.new(opts)
 end
@@ -90,7 +77,7 @@ end
 ---
 ---@return obsidian.Client
 obsidian.setup = function(opts)
-  opts = obsidian.config.ClientOpts.normalize(opts)
+  opts = obsidian.config.normalize(opts)
   local client = obsidian.new(opts)
   log.set_level(client.opts.log_level)
 
@@ -108,9 +95,9 @@ obsidian.setup = function(opts)
 
   -- Register completion sources, providers
   if opts.completion.nvim_cmp then
-    require("obsidian.completion.plugin_initializers.nvim_cmp").register_sources()
+    require("obsidian.completion.plugin_initializers.nvim_cmp").register_sources(opts)
   elseif opts.completion.blink then
-    require("obsidian.completion.plugin_initializers.blink").register_providers()
+    require("obsidian.completion.plugin_initializers.blink").register_providers(opts)
   end
 
   local group = vim.api.nvim_create_augroup("obsidian_setup", { clear = true })
@@ -158,9 +145,9 @@ obsidian.setup = function(opts)
 
       -- Inject completion sources, providers to their plugin configurations
       if opts.completion.nvim_cmp then
-        require("obsidian.completion.plugin_initializers.nvim_cmp").inject_sources()
+        require("obsidian.completion.plugin_initializers.nvim_cmp").inject_sources(opts)
       elseif opts.completion.blink then
-        require("obsidian.completion.plugin_initializers.blink").inject_sources()
+        require("obsidian.completion.plugin_initializers.blink").inject_sources(opts)
       end
 
       -- Run enter-note callback.

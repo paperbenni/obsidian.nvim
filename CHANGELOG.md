@@ -9,25 +9,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `makefile types` target to check types via lua-ls
-- Added `.github/pull_request_template.md` to make contributing simpler
-- Allow users to have a period in the note ID as in a [Johnny.Decimal](https://johnnydecimal.com/) format
-- Added `backlinks` config table with the associated `obsidian.config.BacklinkOpts`
-- Added `parse_headers` toggle that disables markdown header parsing for `ObsidianBacklinks`.
-- Added autocmd events for user scripting, see https://github.com/obsidian-nvim/obsidian.nvim/wiki/Autocmds
+- When filling out a template with user-provided substitution functions, pass a "context" object to each invocation so that users can respond accordingly.
+  - Added `obsidian.InsertTemplateContext` and `obsidian.CloneTemplateContext` as these new "context" objects.
+- Github workflow and `make types` now use `lua-language-server` to check type issues.
+- Added the `completion.create_new` option to allow for disabling new note creation in the picker.
+- Added `makefile types` target to check types via lua-ls.
+- New `obsidian.config` type for user config type check.
 
 ### Changed
 
 - Remove `itertools.lua` in favor of `vim.iter`
-- Configure `foldmethod`, `foldexpr`, and `foldlevel` in ftplugin instead of the BufEnter event. This allows user overrides of these configurations.
-- Remove `fillchars`, `foldtext`, and `smoothscroll` configurations.
-- Relaxed yaml dump quoting condition so that dates are not quoted
-- Update Stylua version from 0.15.1 → 2.1.0
+- Commands are now context sensitive (mode and if in note)
+- Remove `debug` command, and point user to `checkhealth obsidian`
 
 ### Fixed
 
-- Fixed types in `_snacks.lua`
-- Fixed command documentation
+- Only error once if template folder is not found.
+- Fixed corrupted text when custom variables appear more than once in a template file (#198)
+- Add further checks to void false positives when finding tags
+- Off-by-one bug when avoiding tag in code blocks
+
+### Changed
+
+- Refactor the `util` module.
+- Use `vim.defaulttable` instead of custom impl.
+
+## [v3.12.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.12.0) - 2025-06-05
+
+### Added
+
+- Allow users to have a period in the note ID as in a [Johnny.Decimal](https://johnnydecimal.com/) format.
+- Added `make types` target to check types via lua-ls.
+- Added `.github/pull_request_template.md` to make contributing simpler.
+- Added `backlinks` module with the associated `obsidian.config.BacklinkOpts`.
+  - Added `parse_headers` toggle that disables markdown header parsing for `ObsidianBacklinks`.
+- Added `open` module for `Obsidian open` related options.
+- Added autocmd events for user scripting, see [wiki](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Autocmds).
+- Added `opts.ui.ignore_conceal_warn` option to ignore conceal-related warnings.
+- Added `vsplit_force` and `hsplit_force` open strategies. These will always open a vertical/horizontal split if the file is not already in the adjacent split.
+
+### Changed
+
+- Remove `itertools.lua` in favor of `vim.iter`.
+- Configure `foldmethod`, `foldexpr`, and `foldlevel` in ftplugin instead of the BufEnter event. This allows user overrides of these configurations.
+- Remove `fillchars`, `foldtext`, and `smoothscroll` configurations.
+- Refactored `path.lua` to use more functions from `vim.fs`.
+- Relaxed yaml dump quoting condition so that dates are not quoted.
+- Update Stylua version from 0.15.1 → 2.1.0.
+- Use `vim.deprecate` to show deprecate warnings.
+- Deprecate `open_app_foreground`.
+- Remove most `plenary.nvim` usage.
+- Use `io` functions instead of `File` class
+
+### Fixed
+
+- Allow multiword note title in `new_from_template`.
+- Allow `@` in urls to better open youtube links.
+- Fixed types in `_snacks.lua`.
+- Fixed command documentation.
+- Fixed compatibility issue in using `vim.fs`
+- Fixed default open func
 
 ## [v3.11.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.11.0) - 2025-05-04
 

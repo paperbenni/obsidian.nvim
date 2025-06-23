@@ -7,3 +7,5 @@ doc/tags
 _neovim
 _runtime
 tags
+deps/
+.repro/
