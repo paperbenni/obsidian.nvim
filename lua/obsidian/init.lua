@@ -11,7 +11,6 @@ local module_lookups = {
   config = "obsidian.config",
   log = "obsidian.log",
   img_paste = "obsidian.img_paste",
-  mappings = "obsidian.mappings",
   Note = "obsidian.note",
   Path = "obsidian.path",
   pickers = "obsidian.pickers",
@@ -90,7 +89,7 @@ obsidian.setup = function(opts)
   end
 
   if opts.statusline.enabled then
-    client:statusline()
+    require("obsidian.statusline").start(client)
   end
 
   -- Register completion sources, providers
@@ -135,13 +134,16 @@ obsidian.setup = function(opts)
       if not client.current_workspace.locked and workspace ~= client.current_workspace then
         log.debug("Switching to workspace '%s' @ '%s'", workspace.name, workspace.path)
         client:set_workspace(workspace)
-        client:update_ui(ev.buf)
+        require("obsidian.ui").update(ev.buf)
       end
 
-      -- Register mappings.
-      for mapping_keys, mapping_config in pairs(opts.mappings) do
-        vim.keymap.set("n", mapping_keys, mapping_config.action, mapping_config.opts)
-      end
+      -- Register keymap.
+      vim.keymap.set("n", "<CR>", require("obsidian.builtin").smart_action, {
+        expr = true,
+        buffer = true,
+        noremap = false,
+        desc = "Obsidian Smart Action",
+      })
 
       -- Inject completion sources, providers to their plugin configurations
       if opts.completion.nvim_cmp then
