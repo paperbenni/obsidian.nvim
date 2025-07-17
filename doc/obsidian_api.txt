@@ -37,15 +37,12 @@ Class ~
 
 ------------------------------------------------------------------------------
                                                          *obsidian.Client.new()*
-                              `Client.new`({opts})
+                                 `Client.new`()
 Create a new Obsidian client without additional setup.
 This is mostly used for testing. In practice you usually want to obtain the existing
 client through:
 
 `require("obsidian").get_client()`
-
-Parameters ~
-{opts} `(obsidian.config.ClientOpts)`
 
 Return ~
 `(obsidian.Client)`
@@ -857,6 +854,13 @@ Return ~
                       `Workspace.set`({workspace}, {opts})
 Parameters ~
 {workspace} `(obsidian.Workspace)`
+{opts} `({ lock: boolean|? }|)`?
+
+------------------------------------------------------------------------------
+                                                   *obsidian.Workspace.switch()*
+                    `Workspace.switch`({workspace}, {opts})
+Parameters ~
+{workspace} `(obsidian.Workspace|string)` The workspace object or the name of an existing workspace.
 {opts} `({ lock: boolean|? }|)`?
 
 ------------------------------------------------------------------------------
