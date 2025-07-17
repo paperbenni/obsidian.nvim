@@ -526,6 +526,10 @@ See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps]]
     opts.image_name_func = nil
   end
 
+  if opts.statusline and opts.statusline.enabled then
+    deprecate("statusline.{enabled,format} and vim.g.obsidian", "footer.{enabled,format}", "4.0")
+  end
+
   --------------------------
   -- Merge with defaults. --
   --------------------------
@@ -557,10 +561,6 @@ see https://github.com/obsidian-nvim/obsidian.nvim/wiki/Commands for details.
     ]],
       "4.0"
     )
-  end
-
-  if opts.statusline.enabled then
-    deprecate("statusline.{enabled,format} and vim.g.obsidian", "footer.{enabled,format}", "4.0")
   end
 
   if opts.sort_by ~= nil and not vim.tbl_contains(vim.tbl_values(config.SortBy), opts.sort_by) then
