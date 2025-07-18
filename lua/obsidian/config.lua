@@ -354,8 +354,12 @@ config.default = {
   ---
   ---Order of checkbox state chars, e.g. { " ", "x" }
   ---@field order? string[]
+  ---
+  ---Whether to create new checkbox on paragraphs
+  ---@field create_new? boolean
   checkbox = {
     enabled = true,
+    create_new = true,
     order = { " ", "~", "!", ">", "x" },
   },
 }
@@ -547,6 +551,7 @@ See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps]]
   opts.statusline = tbl_override(defaults.statusline, opts.statusline)
   opts.footer = tbl_override(defaults.footer, opts.footer)
   opts.open = tbl_override(defaults.open, opts.open)
+  opts.checkbox = tbl_override(defaults.checkbox, opts.checkbox)
 
   ---------------
   -- Validate. --

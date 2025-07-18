@@ -129,16 +129,19 @@ M.toggle_checkbox = function(states, line_num)
         break
       end
     end
-  else
+  elseif Obsidian.opts.checkbox.create_new then
     local unordered_list_pattern = "^(%s*)[-*+] (.*)"
     if string.match(line, unordered_list_pattern) then
       line = string.gsub(line, unordered_list_pattern, "%1- [ ] %2")
     else
       line = string.gsub(line, "^(%s*)", "%1- [ ] ")
     end
+  else
+    goto out
   end
 
   vim.api.nvim_buf_set_lines(0, line_num - 1, line_num, true, { line })
+  ::out::
 end
 
 ---@return [number, number, number, number] tuple containing { buf, win, row, col }
