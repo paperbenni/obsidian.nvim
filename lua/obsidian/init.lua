@@ -130,6 +130,10 @@ obsidian.setup = function(opts)
         return
       end
 
+      if opts.comment.enabled then
+        vim.o.commentstring = "%%%s%%"
+      end
+
       -- Switch to the workspace and complete the workspace setup.
       if not Obsidian.workspace.locked and workspace ~= Obsidian.workspace then
         log.debug("Switching to workspace '%s' @ '%s'", workspace.name, workspace.path)

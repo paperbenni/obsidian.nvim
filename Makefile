@@ -28,7 +28,6 @@ lint: ## Lint the code with luacheck
 style:  ## Format the code with stylua
 	stylua --check .
 
-# TODO: add type checking with lua-ls
 types: ## Type check with lua-ls
 	lua-language-server --configpath "$(LUARC)" --check lua/obsidian/
 

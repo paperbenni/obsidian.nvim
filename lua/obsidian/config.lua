@@ -33,6 +33,7 @@ local config = {}
 ---@field footer? obsidian.config.FooterOpts
 ---@field open? obsidian.config.OpenOpts
 ---@field checkbox? obsidian.config.CheckboxOpts
+---@field comment? obsidian.config.CommentOpts
 
 ---@class obsidian.config.ClientOpts
 ---@field dir string|?
@@ -66,6 +67,7 @@ local config = {}
 ---@field footer obsidian.config.FooterOpts
 ---@field open obsidian.config.OpenOpts
 ---@field checkbox obsidian.config.CheckboxOpts
+---@field comment obsidian.config.CommentOpts
 
 ---@enum obsidian.config.OpenStrategy
 config.OpenStrategy = {
@@ -362,6 +364,12 @@ config.default = {
     create_new = true,
     order = { " ", "~", "!", ">", "x" },
   },
+
+  ---@class obsidian.config.CommentOpts
+  ---@field enabled boolean
+  comment = {
+    enabled = false,
+  },
 }
 
 local tbl_override = function(defaults, overrides)
@@ -552,6 +560,7 @@ See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps]]
   opts.footer = tbl_override(defaults.footer, opts.footer)
   opts.open = tbl_override(defaults.open, opts.open)
   opts.checkbox = tbl_override(defaults.checkbox, opts.checkbox)
+  opts.comment = tbl_override(defaults.comment, opts.comment)
 
   ---------------
   -- Validate. --
