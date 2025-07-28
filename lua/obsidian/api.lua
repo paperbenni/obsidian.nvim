@@ -15,7 +15,6 @@ M.dir = function(dir)
     skip = function(p)
       return not vim.startswith(p, ".") and p ~= vim.fs.basename(tostring(M.templates_dir()))
     end,
-    follow = true,
   }
 
   return vim
@@ -294,26 +293,6 @@ M.open_buffer = function(path, opts)
   end
 
   return result_bufnr
-end
-
----Get an iterator of (bufnr, bufname) over all named buffers. The buffer names will be absolute paths.
----
----@return function () -> (integer, string)|?
-M.get_named_buffers = function()
-  local idx = 0
-  local buffers = vim.api.nvim_list_bufs()
-
-  ---@return integer|?
-  ---@return string|?
-  return function()
-    while idx < #buffers do
-      idx = idx + 1
-      local bufnr = buffers[idx]
-      if vim.api.nvim_buf_is_loaded(bufnr) then
-        return bufnr, vim.api.nvim_buf_get_name(bufnr)
-      end
-    end
-  end
 end
 
 ----------------
@@ -633,8 +612,8 @@ M.follow_link = function(link, opts)
   opts = opts and opts or {}
   local Note = require "obsidian.note"
 
-  search.resolve_link_async(link, function(results)
-    if #results == 0 then
+  search.resolve_link_async(link, function(result)
+    if not result then
       return
     end
 
@@ -685,43 +664,11 @@ M.follow_link = function(link, opts)
       return log.err("Failed to resolve file '" .. res.location .. "'")
     end
 
-    if #results == 1 then
-      return vim.schedule(function()
-        follow_link(results[1])
-      end)
-    else
-      return vim.schedule(function()
-        local picker = Obsidian.picker
-        if not picker then
-          log.err("Found multiple matches to '%s', but no picker is configured", link)
-          return
-        end
-
-        ---@type obsidian.PickerEntry[]
-        local entries = {}
-        for _, res in ipairs(results) do
-          local icon, icon_hl
-          if res.url ~= nil then
-            icon, icon_hl = M.get_icon(res.url)
-          end
-          table.insert(entries, {
-            value = res,
-            display = res.name,
-            filename = res.path and tostring(res.path) or nil,
-            icon = icon,
-            icon_hl = icon_hl,
-          })
-        end
-
-        picker:pick(entries, {
-          prompt_title = "Follow link",
-          callback = function(res)
-            follow_link(res)
-          end,
-        })
-      end)
-    end
-  end)
+    -- if #results == 1 then
+    return vim.schedule(function()
+      follow_link(result)
+    end)
+  end, { pick = true })
 end
 --------------------------
 ---- Mapping functions ---
