@@ -583,9 +583,11 @@ Return ~
 
 ------------------------------------------------------------------------------
                                                           *obsidian.Note.open()*
-                          `Note.open`({self}, {opts})
+                      `Note.open`({note_or_path}, {opts})
 Open a note in a buffer.
+
 Parameters ~
+{note_or_path} `(string|obsidian.Path|obsidian.Note)`
 {opts} `({ line: integer|?, col: integer|?, open_strategy: obsidian.config.OpenStrategy|?, sync: boolean|?, callback: fun(bufnr: integer)|? }|)`?
 
 ------------------------------------------------------------------------------
