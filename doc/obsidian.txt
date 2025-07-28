@@ -165,8 +165,7 @@ SYSTEM REQUIREMENTS                             *obsidian-system-requirements*
 
 PLUGIN DEPENDENCIES                             *obsidian-plugin-dependencies*
 
-The only **required** plugin dependency is plenary.nvim
-<https://github.com/nvim-lua/plenary.nvim>, but there are a number of optional
+There’s no required dependency, but there are a number of optional
 dependencies that enhance the obsidian.nvim experience.
 
 **Completion:**
@@ -238,12 +237,6 @@ Click for install snippet ~
       --   "BufReadPre path/to/my-vault/*.md",
       --   "BufNewFile path/to/my-vault/*.md",
       -- },
-      dependencies = {
-        -- Required.
-        "nvim-lua/plenary.nvim",
-    
-        -- see above for full list of optional dependencies ☝️
-      },
       ---@module 'obsidian'
       ---@type obsidian.config
       opts = {
@@ -270,42 +263,6 @@ Click for install snippet ~
 
 >vim
     :Rocks install obsidian
-<
-
-
-USING PACKER.NVIM                                 *obsidian-using-packer.nvim*
-
-It is not recommended because packer.nvim is currently unmaintained
-
-Click for install snippet ~
-
->lua
-    use {
-      "obsidian-nvim/obsidian.nvim",
-      tag = "*", -- recommended, use latest release instead of latest commit
-      requires = {
-        -- Required.
-        "nvim-lua/plenary.nvim",
-    
-        -- see above for full list of optional dependencies ☝️
-      },
-      config = function()
-        require("obsidian").setup {
-          workspaces = {
-            {
-              name = "personal",
-              path = "~/vaults/personal",
-            },
-            {
-              name = "work",
-              path = "~/vaults/work",
-            },
-          },
-    
-          -- see below for full list of options 👇
-        }
-      end,
-    }
 <
 
 
