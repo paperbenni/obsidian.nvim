@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-- Fixed types in `opts.workspaces[*].overrides` to all be optional.
-
 ### Added
 
 - Allow custom directory and ID logic for templates
@@ -80,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed ignore subdirectories specified in `daily_notes.date_format`
 - Fixed not make sure template folder exists.
 - Refactored workspace module for a better api.
+- Fixed types in `opts.workspaces[*].overrides` to all be optional.
 
 ## [v3.12.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.12.0) - 2025-06-05
 
