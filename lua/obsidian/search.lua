@@ -736,7 +736,7 @@ end
 --- Resolve a note, opens a picker to choose a single note when there are multiple matches.
 ---
 ---@param query string
----@param callback fun(obsidian.Note)
+---@param callback fun(note: obsidian.Note|nil)
 ---@param opts { notes: obsidian.note.LoadOpts|?, prompt_title: string|?, pick: boolean }|?
 ---
 ---@return obsidian.Note|?
@@ -746,7 +746,7 @@ M.resolve_note_async = function(query, callback, opts)
 
   _resolve_note_async(query, function(notes)
     if #notes == 0 then
-      return log.err("No notes matching '%s'", query)
+      return callback()
     elseif #notes == 1 then
       return callback(notes[1])
     end

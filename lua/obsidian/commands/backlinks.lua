@@ -94,8 +94,7 @@ return function(client)
 
     search.resolve_note_async(location, function(note)
       if not note then
-        log.err("No notes matching '%s'", location)
-        return
+        return log.err("No notes matching '%s'", location)
       else
         return collect_backlinks(client, picker, note, opts)
       end
