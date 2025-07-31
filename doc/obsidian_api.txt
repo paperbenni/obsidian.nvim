@@ -691,7 +691,7 @@ Parameters ~
 Parameters ~
 {path} `(table)`
 {k} `(string)`
-{factory} `(fun(obsidian.Path): any)`
+{factory} `(fun(path: obsidian.Path): any)`
 
 ------------------------------------------------------------------------------
                                                                  *obsidian.Path*
