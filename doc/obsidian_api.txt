@@ -91,45 +91,6 @@ Parameters ~
 {opts} `({ search: obsidian.SearchOpts }|)`?
 
 ------------------------------------------------------------------------------
-Class ~
-{obsidian.BacklinkMatches}
-
-Fields ~
-{note} `(obsidian.Note)` The note instance where the backlinks were found.
-{path} `(string|obsidian.Path)` The path to the note where the backlinks were found.
-{matches} `(obsidian.BacklinkMatch[])` The backlinks within the note.
-
-------------------------------------------------------------------------------
-Class ~
-{obsidian.BacklinkMatch}
-
-Fields ~
-{line} `(integer)` The line number (1-indexed) where the backlink was found.
-{text} `(string)` The text of the line where the backlink was found.
-
-------------------------------------------------------------------------------
-                                              *obsidian.Client.find_backlinks()*
-                `Client.find_backlinks`({self}, {note}, {opts})
-Find all backlinks to a note.
-
-Parameters ~
-{note} `(obsidian.Note)` The note to find backlinks for.
-{opts} `({ search: obsidian.SearchOpts|?, timeout: integer|?, anchor: string|?, block: string|? }|)`?
-
-Return ~
-`(obsidian.BacklinkMatches[])`
-
-------------------------------------------------------------------------------
-                                        *obsidian.Client.find_backlinks_async()*
-       `Client.find_backlinks_async`({self}, {note}, {callback}, {opts})
-An async version of 'find_backlinks()'.
-
-Parameters ~
-{note} `(obsidian.Note)` The note to find backlinks for.
-{callback} `(fun(backlinks: obsidian.BacklinkMatches[]))`
-{opts} `({ search: obsidian.SearchOpts, anchor: string|?, block: string|? }|)`?
-
-------------------------------------------------------------------------------
                                                    *obsidian.Client.list_tags()*
                  `Client.list_tags`({self}, {term}, {timeout})
 Gather a list of all tags in the vault. If 'term' is provided, only tags that partially match the search
