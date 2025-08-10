@@ -139,6 +139,10 @@ obsidian.setup = function(opts)
         return
       end
 
+      vim.wo.foldmethod = "expr"
+      vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+      vim.wo.foldlevel = 99
+
       if opts.comment.enabled then
         vim.o.commentstring = "%%%s%%"
       end
