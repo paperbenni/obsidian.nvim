@@ -209,13 +209,13 @@ Fields ~
 
 ------------------------------------------------------------------------------
                                                         *obsidian.generate_id()*
-                 `generate_id`({title}, {path}, {alt_id_func})
+                   `generate_id`({title}, {path}, {id_func})
 Generate a unique ID for a new note. This respects the user's `note_id_func` if configured,
 otherwise falls back to generated a Zettelkasten style ID.
 
 @param title? string
 @param path? obsidian.Path
-@param alt_id_func? (fun(title: string|?, path: obsidian.Path|?): string)
+@param id_func (fun(title: string|?, path: obsidian.Path|?): string)
 Return ~
 `(string)`
 
@@ -544,11 +544,11 @@ Return ~
 
 ------------------------------------------------------------------------------
                                                           *obsidian.Note.open()*
-                      `Note.open`({note_or_path}, {opts})
+                          `Note.open`({note}, {opts})
 Open a note in a buffer.
 
 Parameters ~
-{note_or_path} `(string|obsidian.Path|obsidian.Note)`
+{note} `(obsidian.Note)`
 {opts} `({ line: integer|?, col: integer|?, open_strategy: obsidian.config.OpenStrategy|?, sync: boolean|?, callback: fun(bufnr: integer)|? }|)`?
 
 ------------------------------------------------------------------------------
