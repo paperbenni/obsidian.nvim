@@ -1,7 +1,6 @@
-*obsidian.nvim*           a plugin for writing and navigating an Obsidian vault
+*obsidian*           a plugin for writing and navigating an Obsidian vault
 
 obsidian.nvim
-
 A **community fork** of the Neovim plugin for writing and navigating Obsidian
 <https://obsidian.md> vaults, written in Lua, created by epwalsh
 <https://github.com/epwalsh>.
@@ -56,37 +55,43 @@ to another note.
 
 📈 **Status:** See note status in statusline like obsidian app.
 
-💅 **Syntax:** Additional markdown syntax highlighting, concealing, and
-extmarks for references, tags, and check-boxes.
 
+KEYMAPS                                                     *obsidian-keymaps*
 
-<https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687>
-
-
-==============================================================================
-3. Keymaps                                                  *obsidian-keymaps*
-
-These default keymaps will only be set if you are in a valid workspace and a
-markdown buffer:
-
-- `smart_action` is the most important one you will use, it is bind to `<CR>` by default, it will
+- `smart_action`, bind to `<CR>` will:
     - If cursor is on a link, follow the link
     - If cursor is on a tag, show all notes with that tag in a picker
     - If cursor is on a checkbox, toggle the checkbox
     - If cursor is on a heading, cycle the fold of that heading
-- `gf`: Follow link under the cursor, falls back to normal vim `gf` if not on a link
-- `<leader>ch>`: Toggle check-boxes
+- `nav_link`, bind to `[o` and `]o` will navigate cursor to next valid link in the buffer.
+
+For remapping and creating your own mappings, see Keymaps
+<https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps>
 
 
 COMMANDS                                                   *obsidian-commands*
+
+There’s one entry point user command for this plugin: `Obsidian`
+
+- `Obsidian<CR>` (`<enter>`) to select sub commands.
+- `Obsidian <Tab>` to get completion for sub commands.
+- Sub commands are context sensitive, meaning some actions will only appear when:
+    - you are in a note.
+    - you are in visual mode.
+- See Commands <https://github.com/obsidian-nvim/obsidian.nvim/wiki/Commands> for more info.
+
+**List of available commands:**
 
 - `:Obsidian backlinks` for getting a picker list of references to the current
     buffer.
 - `:Obsidian dailies [OFFSET ...]` to open a picker list of daily notes. For
     example, `:Obsidian dailies -2 1` to list daily notes from 2 days ago until
     tomorrow.
-- `:Obsidian follow_link [vsplit|hsplit]` to follow a note reference under the
-    cursor, optionally opening it in a vertical or horizontal split.
+- `:Obsidian extract_note [TITLE]` to extract the visually selected text into a
+    new note and link to it.
+- `:Obsidian follow_link [vsplit|hsplit|vsplit_force|hsplit_force]` to follow a
+    note reference under the cursor, optionally opening it in a vertical or
+    horizontal split.
 - `:Obsidian link [QUERY]` to link an inline visual selection of text to a note.
     One optional argument: a query that will be used to resolve the note by ID,
     path, or alias. If not given, the selected text will be used as the query.
@@ -97,18 +102,25 @@ COMMANDS                                                   *obsidian-commands*
     window.
 - `:Obsidian new [TITLE]` to create a new note. One optional argument: the title
     of the new note.
-- `:Obsidian new_from_template [TITLE]` to create a new note from a template in
-    the templates folder. Selecting from a list using your preferred picker.
+- `:Obsidian new_from_template [TITLE] [TEMPLATE]` to create a new note with
+    `TITLE` from a template with the name `TEMPLATE`. Both arguments are optional.
+    If not given, the template will be selected from a list using your preferred
+    picker.
 - `:Obsidian open [QUERY]` to open a note in the Obsidian app. One optional
     argument: a query used to resolve the note to open by ID, path, or alias. If
     not given, the current buffer is used.
+- `:Obsidian paste_img [IMGNAME]` to paste an image from the clipboard into the
+    note at the cursor position by saving it to the vault and adding a markdown
+    image link. You can configure the default folder to save images to with the
+    `attachments.img_folder` option. See Images
+    <https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images#change-image-save-location>.
 - `:Obsidian quick_switch` to quickly switch to another note in your vault,
     searching by its name with a picker.
-- `:Obsidian rename [NEWNAME] [--dry-run]` to rename the note of the current
-    buffer or reference under the cursor, updating all backlinks across the vault.
-    It is highly recommended to commit the current state of your vault (if you’re
-    using version control) before running it, or doing a dry-run first by
-    `:Obsidian rename new-id --dry-run`.
+- `:Obsidian rename [NEWNAME]` to rename the note of the current buffer or
+    reference under the cursor, updating all backlinks across the vault. It will
+    run `:wa` before renaming, and load every note with backlinks into your
+    buffer-list, then you need to do `:wa` after for changes to take effect.
+    Alternatively, call `vim.lsp.buf.rename` or use `grn`.
 - `:Obsidian search [QUERY]` to search for (or create) notes in your vault using
     `ripgrep` with your preferred picker.
 - `:Obsidian tags [TAG ...]` for getting a picker list of all occurrences of the
@@ -136,7 +148,7 @@ DEMO                                                           *obsidian-demo*
 
 
 ==============================================================================
-4. 📝 Requirements                              *obsidian-📝-requirements*
+3. 📝 Requirements                              *obsidian-📝-requirements*
 
 
 SYSTEM REQUIREMENTS                             *obsidian-system-requirements*
@@ -153,21 +165,25 @@ SYSTEM REQUIREMENTS                             *obsidian-system-requirements*
 
 PLUGIN DEPENDENCIES                             *obsidian-plugin-dependencies*
 
-The only **required** plugin dependency is plenary.nvim
-<https://github.com/nvim-lua/plenary.nvim>, but there are a number of optional
+There’s no required dependency, but there are a number of optional
 dependencies that enhance the obsidian.nvim experience.
 
 **Completion:**
 
-- **[recommended]** hrsh7th/nvim-cmp <https://github.com/hrsh7th/nvim-cmp>
+- **[recommended]** nvim-cmp <https://github.com/hrsh7th/nvim-cmp>
 - blink.cmp <https://github.com/Saghen/blink.cmp> (new)
 
 **Pickers:**
 
-- **[recommended]** nvim-telescope/telescope.nvim <https://github.com/nvim-telescope/telescope.nvim>
-- ibhagwan/fzf-lua <https://github.com/ibhagwan/fzf-lua>
-- Mini.Pick <https://github.com/echasnovski/mini.pick> from the mini.nvim library
-- Snacks.Picker <https://github.com/folke/snacks.nvim/blob/main/docs/picker.md> from the snacks.nvim library
+- **[recommended]** telescope.nvim <https://github.com/nvim-telescope/telescope.nvim>
+- fzf-lua <https://github.com/ibhagwan/fzf-lua>
+- mini.pick <https://github.com/echasnovski/mini.pick>
+- snacks.picker <https://github.com/folke/snacks.nvim/blob/main/docs/picker.md>
+
+**Image viewing:**
+
+- snacks.image <https://github.com/folke/snacks.nvim/blob/main/docs/image.md>
+- See Images <https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images> for configuration.
 
 **Syntax highlighting:**
 
@@ -175,7 +191,7 @@ See |obsidian-syntax-highlighting| for more details.
 
 - For base syntax highlighting:
     - **[recommended]** nvim-treesitter <https://github.com/nvim-treesitter/nvim-treesitter>
-    - preservim/vim-markdown <https://github.com/preservim/vim-markdown>
+    - vim-markdown <https://github.com/preservim/vim-markdown>
 - For additional syntax features:
     - render-markdown.nvim <https://github.com/MeanderingProgrammer/render-markdown.nvim>
     - markview.nvim <https://github.com/OXY2DEV/markview.nvim>
@@ -185,7 +201,7 @@ or "requires" field of the obsidian.nvim plugin spec for your package manager.
 
 
 ==============================================================================
-5. 📥 Installation                              *obsidian-📥-installation*
+4. 📥 Installation                              *obsidian-📥-installation*
 
 To configure obsidian.nvim you just need to call `require("obsidian").setup({
 ... })` with the desired options. Here are some examples using different plugin
@@ -221,14 +237,8 @@ Click for install snippet ~
       --   "BufReadPre path/to/my-vault/*.md",
       --   "BufNewFile path/to/my-vault/*.md",
       -- },
-      dependencies = {
-        -- Required.
-        "nvim-lua/plenary.nvim",
-    
-        -- see above for full list of optional dependencies ☝️
-      },
       ---@module 'obsidian'
-      ---@type obsidian.config.ClientOpts
+      ---@type obsidian.config
       opts = {
         workspaces = {
           {
@@ -256,44 +266,8 @@ Click for install snippet ~
 <
 
 
-USING PACKER.NVIM                                 *obsidian-using-packer.nvim*
-
-It is not recommended because packer.nvim is currently unmaintained
-
-Click for install snippet ~
-
->lua
-    use {
-      "obsidian-nvim/obsidian.nvim",
-      tag = "*", -- recommended, use latest release instead of latest commit
-      requires = {
-        -- Required.
-        "nvim-lua/plenary.nvim",
-    
-        -- see above for full list of optional dependencies ☝️
-      },
-      config = function()
-        require("obsidian").setup {
-          workspaces = {
-            {
-              name = "personal",
-              path = "~/vaults/personal",
-            },
-            {
-              name = "work",
-              path = "~/vaults/work",
-            },
-          },
-    
-          -- see below for full list of options 👇
-        }
-      end,
-    }
-<
-
-
 ==============================================================================
-6. ⚙️ Configuration                        *obsidian-⚙️-configuration*
+5. ⚙️ Configuration                        *obsidian-⚙️-configuration*
 
 This is a complete list of all the options that can be passed to
 `require("obsidian").setup()`. The settings below are _not necessarily the
@@ -359,32 +333,8 @@ Click to see configuration options ~
         blink = false,
         -- Trigger completion at 2 chars.
         min_chars = 2,
-      },
-    
-      -- Optional, configure key mappings. These are the defaults. If you don't want to set any keymappings this
-      -- way then set 'mappings = {}'.
-      mappings = {
-        -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
-        ["gf"] = {
-          action = function()
-            return require("obsidian").util.gf_passthrough()
-          end,
-          opts = { noremap = false, expr = true, buffer = true },
-        },
-        -- Toggle check-boxes.
-        ["<leader>ch"] = {
-          action = function()
-            return require("obsidian").util.toggle_checkbox()
-          end,
-          opts = { buffer = true },
-        },
-        -- Smart action depending on context: follow link, show notes with tag, toggle checkbox, or toggle heading fold
-        ["<cr>"] = {
-          action = function()
-            return require("obsidian").util.smart_action()
-          end,
-          opts = { buffer = true, expr = true },
-        },
+        -- Set to false to disable new note creation in the picker
+        create_new = true,
       },
     
       -- Where to put new notes. Valid options are
@@ -398,7 +348,8 @@ Click to see configuration options ~
       note_id_func = function(title)
         -- Create note IDs in a Zettelkasten format with a timestamp and a suffix.
         -- In this case a note with the title 'My new note' will be given an ID that looks
-        -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'
+        -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'.
+        -- You may have as many periods in the note ID as you'd like—the ".md" will be added automatically
         local suffix = ""
         if title ~= nil then
           -- If title is given, transform it into valid file name.
@@ -469,8 +420,14 @@ Click to see configuration options ~
         folder = "templates",
         date_format = "%Y-%m-%d",
         time_format = "%H:%M",
-        -- A map for custom variables, the key should be the variable and the value a function
+        -- A map for custom variables, the key should be the variable and the value a function.
+        -- Functions are called with obsidian.TemplateContext objects as their sole parameter.
+        -- See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Template#substitutions
         substitutions = {},
+    
+        -- A map for configuring unique directories and paths for specific templates
+        --- See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Template#customizations
+        customizations = {},
       },
     
       -- Sets how you follow URLs
@@ -483,16 +440,21 @@ Click to see configuration options ~
       -- Sets how you follow images
       ---@param img string
       follow_img_func = function(img)
-        vim.ui.open(url)
-        -- vim.ui.open(url, { cmd = { "loupe" } })
+        vim.ui.open(img)
+        -- vim.ui.open(img, { cmd = { "loupe" } })
       end,
     
-      -- Optional, set to true if you use the Obsidian Advanced URI plugin.
-      -- https://github.com/Vinzent03/obsidian-advanced-uri
-      use_advanced_uri = false,
-    
-      -- Optional, set to true to force ':Obsidian open' to bring the app to the foreground.
-      open_app_foreground = false,
+      ---@class obsidian.config.OpenOpts
+      ---
+      ---Opens the file with current line number
+      ---@field use_advanced_uri? boolean
+      ---
+      ---Function to do the opening, default to vim.ui.open
+      ---@field func? fun(uri: string)
+      open = {
+        use_advanced_uri = false,
+        func = vim.ui.open,
+      },
     
       picker = {
         -- Set your preferred picker. Can be one of 'telescope.nvim', 'fzf-lua', 'mini.pick' or 'snacks.pick'.
@@ -513,6 +475,13 @@ Click to see configuration options ~
         },
       },
     
+      -- Optional, by default, `:ObsidianBacklinks` parses the header under
+      -- the cursor. Setting to `false` will get the backlinks for the current
+      -- note instead. Doesn't affect other link behaviour.
+      backlinks = {
+        parse_headers = true,
+      },
+    
       -- Optional, sort search results by "path", "modified", "accessed", or "created".
       -- The recommend value is "modified" and `true` for `sort_reversed`, which means, for example,
       -- that `:Obsidian quick_switch` will show the notes sorted by latest modified time
@@ -524,8 +493,10 @@ Click to see configuration options ~
     
       -- Optional, determines how certain commands open notes. The valid options are:
       -- 1. "current" (the default) - to always open in the current window
-      -- 2. "vsplit" - to open in a vertical split if there's not already a vertical split
-      -- 3. "hsplit" - to open in a horizontal split if there's not already a horizontal split
+      -- 2. "vsplit" - only open in a vertical split if a vsplit does not exist.
+      -- 3. "hsplit" - only open in a horizontal split if a hsplit does not exist.
+      -- 4. "vsplit_force" - always open a new vertical split if the file is not in the adjacent vsplit.
+      -- 5. "hsplit_force" - always open a new horizontal split if the file is not in the adjacent hsplit.
       open_notes_in = "current",
     
       -- Optional, define your own callbacks to further customize behavior.
@@ -550,15 +521,15 @@ Click to see configuration options ~
         pre_write_note = function(client, note) end,
     
         -- Runs anytime the workspace is set/changed.
-        ---@param client obsidian.Client
         ---@param workspace obsidian.Workspace
-        post_set_workspace = function(client, workspace) end,
+        post_set_workspace = function(workspace) end,
       },
     
       -- Optional, configure additional syntax highlighting / extmarks.
       -- This requires you have `conceallevel` set to 1 or 2. See `:help conceallevel` for more details.
       ui = {
         enable = true, -- set to false to disable all additional syntax features
+        ignore_conceal_warn = false, -- set to true to disable conceallevel specific warning
         update_debounce = 200, -- update delay after a text change (in milliseconds)
         max_file_length = 5000, -- disable UI features for files with more than this many lines
         -- Define how various check-boxes are displayed
@@ -600,69 +571,83 @@ Click to see configuration options ~
         },
       },
     
-      -- Specify how to handle attachments.
+      ---@class obsidian.config.AttachmentsOpts
+      ---
+      ---Default folder to save images to, relative to the vault root.
+      ---@field img_folder? string
+      ---
+      ---Default name for pasted images
+      ---@field img_name_func? fun(): string
+      ---
+      ---Default text to insert for pasted images, for customizing, see: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images
+      ---@field img_text_func? fun(path: obsidian.Path): string
+      ---
+      ---Whether to confirm the paste or not. Defaults to true.
+      ---@field confirm_img_paste? boolean
       attachments = {
-        -- The default folder to place images in via `:Obsidian paste_img`.
-        -- If this is a relative path it will be interpreted as relative to the vault root.
-        -- You can always override this per image by passing a full path to the command instead of just a filename.
-        img_folder = "assets/imgs", -- This is the default
-    
-        -- A function that determines default name or prefix when pasting images via `:Obsidian paste_img`.
-        ---@return string
+        img_folder = "assets/imgs",
         img_name_func = function()
-          -- Prefix image names with timestamp.
           return string.format("Pasted image %s", os.date "%Y%m%d%H%M%S")
         end,
-    
-        -- A function that determines the text to insert in the note when pasting an image.
-        -- It takes two arguments, the `obsidian.Client` and an `obsidian.Path` to the image file.
-        -- This is the default implementation.
-        ---@param client obsidian.Client
-        ---@param path obsidian.Path the absolute path to the image file
-        ---@return string
-        img_text_func = function(client, path)
-          path = client:vault_relative_path(path) or path
-          return string.format("![%s](%s)", path.name, path)
-        end,
+        confirm_img_paste = true,
       },
     
-      -- See https://github.com/obsidian-nvim/obsidian.nvim/wiki/Notes-on-configuration#statusline-component
+      ---@deprecated in favor of the footer option below
       statusline = {
         enabled = true,
         format = "{{properties}} properties {{backlinks}} backlinks {{words}} words {{chars}} chars",
+      },
+    
+      ---@class obsidian.config.FooterOpts
+      ---
+      ---@field enabled? boolean
+      ---@field format? string
+      ---@field hl_group? string
+      ---@field separator? string|false Set false to disable separator; set an empty string to insert a blank line separator.
+      footer = {
+        enabled = true,
+        format = "{{backlinks}} backlinks  {{properties}} properties  {{words}} words  {{chars}} chars",
+        hl_group = "Comment",
+        separator = string.rep("-", 80),
+      },
+      ---@class obsidian.config.CheckboxOpts
+      ---
+      ---Order of checkbox state chars, e.g. { " ", "x" }
+      ---@field order? string[]
+      checkbox = {
+        order = { " ", "~", "!", ">", "x" },
       },
     }
 <
 
 
 ==============================================================================
-7. 📖 Documentation                            *obsidian-📖-documentation*
+6. 📖 Documentation                            *obsidian-📖-documentation*
 
 See the obsidian.nvim wiki
 <https://github.com/obsidian-nvim/obsidian.nvim/wiki>
 
 
 ==============================================================================
-8. 🤝 Contributing                              *obsidian-🤝-contributing*
+7. 🤝 Contributing                              *obsidian-🤝-contributing*
 
 Please read the CONTRIBUTING
 <https://github.com/obsidian-nvim/obsidian.nvim/blob/main/CONTRIBUTING.md>
 guide before submitting a pull request.
 
-
+neo451💻Stefan Otte💻guspix💻ffricken💻Erlan Rangel💻bosvik💻Jost Alemann📖Luis Garcia💻Joe💻Horia Gug💻Aquiles Gomez💻Alvaro Sevilla💻Sebastian Stark💻Jumpei Yamakawa💻marcocofano💻Jaehaks💻Magnus💻Noam Stolero💻aileot💻Rico Sta. Cruz📖KIM Hyunjae💻Ben Burgess💻Sebastian Szyller💻nobe4💻Anaritus💻Michael Davis💻Brian Rodriguez💻carschandler📖Aki Sasaki💻Reinaldo Molina💻Stuart Rackham💻Ahmed Mughal💻trash-panda-v91-beta💻Jakob Westhoff💻Christian Johansen💻Volodymyr Kot💻Jorge Villalobos💻
 ==============================================================================
-9. ❤️ Acknowledgement                    *obsidian-❤️-acknowledgement*
+8. ❤️ Acknowledgement                    *obsidian-❤️-acknowledgement*
 
 We would like to thank epwalsh <https://github.com/epwalsh> for creating this
 beautiful plugin. If you’re feeling especially generous, he still appreciates
 some coffee funds! <https://www.buymeacoffee.com/epwalsh>.
 
 ==============================================================================
-10. Links                                                     *obsidian-links*
+9. Links                                                      *obsidian-links*
 
 1. *See this screenshot*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/90d5f218-06cd-4ebb-b00b-b59c2f5c3cc1
-2. *See this screenshot*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687
-3. *2024-01-31 14 22 52*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/2986e1d2-13e8-40e2-9c9e-75691a3b662e
+2. *2024-01-31 14 22 52*: https://github.com/epwalsh/obsidian.nvim/assets/8812459/2986e1d2-13e8-40e2-9c9e-75691a3b662e
 
 Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
 

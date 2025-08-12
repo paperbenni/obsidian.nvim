@@ -1,6 +1,6 @@
 local log = require "obsidian.log"
 local util = require "obsidian.util"
-local search = require "obsidian.search"
+local api = require "obsidian.api"
 
 ---@param client obsidian.Client
 ---@param picker obsidian.Picker
@@ -12,7 +12,7 @@ local function gather_tag_picker_list(client, picker, tags)
     local entries = {}
     for _, tag_loc in ipairs(tag_locations) do
       for _, tag in ipairs(tags) do
-        if tag_loc.tag == tag or vim.startswith(tag_loc.tag, tag .. "/") then
+        if tag_loc.tag:lower() == tag:lower() or vim.startswith(tag_loc.tag:lower(), tag:lower() .. "/") then
           local display = string.format("%s [%s] %s", tag_loc.note:display_name(), tag_loc.line, tag_loc.text)
           entries[#entries + 1] = {
             value = { path = tag_loc.path, line = tag_loc.line, col = tag_loc.tag_start },
@@ -40,7 +40,7 @@ local function gather_tag_picker_list(client, picker, tags)
       picker:pick(entries, {
         prompt_title = "#" .. table.concat(tags, ", #"),
         callback = function(value)
-          util.open_buffer(value.path, { line = value.line, col = value.col })
+          api.open_buffer(value.path, { line = value.line, col = value.col })
         end,
       })
     end)
@@ -50,7 +50,7 @@ end
 ---@param client obsidian.Client
 ---@param data CommandArgs
 return function(client, data)
-  local picker = client:picker()
+  local picker = Obsidian.picker
   if not picker then
     log.err "No picker configured"
     return
@@ -59,22 +59,9 @@ return function(client, data)
   local tags = data.fargs or {}
 
   if vim.tbl_isempty(tags) then
-    -- Check for visual selection.
-    local viz = util.get_visual_selection { strict = true }
-    if viz and #viz.lines == 1 and string.match(viz.selection, "^#?" .. search.Patterns.TagCharsRequired .. "$") then
-      local tag = viz.selection
-
-      if vim.startswith(tag, "#") then
-        tag = string.sub(tag, 2)
-      end
-
+    local tag = api.cursor_tag()
+    if tag then
       tags = { tag }
-    else
-      -- Otherwise check for a tag under the cursor.
-      local tag = util.cursor_tag()
-      if tag then
-        tags = { tag }
-      end
     end
   end
 

@@ -1,8 +1,7 @@
 local abc = require "obsidian.abc"
 local completion = require "obsidian.completion.tags"
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 local obsidian = require "obsidian"
-local util = require "obsidian.util"
 
 ---Used to track variables that are used between reusable method calls. This is required, because each
 ---call to the sources's completion hook won't create a new source object, but will reuse the same one.
@@ -66,11 +65,41 @@ function TagsSourceBase:process_completion(cc)
 
     local items = {}
     for tag, _ in pairs(tags) do
+      -- Generate context-appropriate text
+      local insert_text, label_text
+      if cc.in_frontmatter then
+        -- Frontmatter: insert tag without # (YAML format)
+        insert_text = tag
+        label_text = "Tag: " .. tag
+      else
+        -- Document body: insert tag with # (Obsidian format)
+        insert_text = "#" .. tag
+        label_text = "Tag: #" .. tag
+      end
+
+      -- Calculate the range to replace (the entire #tag pattern)
+      local cursor_before = cc.request.context.cursor_before_line
+      local hash_start = string.find(cursor_before, "#[^%s]*$")
+      local insert_start = hash_start and (hash_start - 1) or #cursor_before
+      local insert_end = #cursor_before
+
       items[#items + 1] = {
         sortText = "#" .. tag,
-        label = "Tag: #" .. tag,
+        label = label_text,
         kind = vim.lsp.protocol.CompletionItemKind.Text,
-        insertText = "#" .. tag,
+        textEdit = {
+          newText = insert_text,
+          range = {
+            ["start"] = {
+              line = cc.request.context.cursor.row - 1,
+              character = insert_start,
+            },
+            ["end"] = {
+              line = cc.request.context.cursor.row - 1,
+              character = insert_end,
+            },
+          },
+        },
         data = {
           bufnr = cc.request.context.bufnr,
           in_frontmatter = cc.in_frontmatter,
@@ -91,25 +120,12 @@ function TagsSourceBase:can_complete_request(cc)
   local can_complete
   can_complete, cc.search, cc.in_frontmatter = completion.can_complete(cc.request)
 
-  if not (can_complete and cc.search ~= nil and #cc.search >= cc.client.opts.completion.min_chars) then
+  if not (can_complete and cc.search ~= nil and #cc.search >= Obsidian.opts.completion.min_chars) then
     cc.completion_resolve_callback(self.incomplete_response)
     return false
   end
 
   return true
-end
-
---- Runs a generalized version of the execute method
----@param item any
-function TagsSourceBase:process_execute(item)
-  if item.data.in_frontmatter then
-    -- Remove the '#' at the start of the tag.
-    -- TODO: ideally we should be able to do this by specifying the completion item in the right way,
-    -- but I haven't figured out how to do that.
-    local line = vim.api.nvim_buf_get_lines(item.data.bufnr, item.data.line, item.data.line + 1, true)[1]
-    line = util.string_replace(line, "#" .. item.data.tag, item.data.tag, 1)
-    vim.api.nvim_buf_set_lines(item.data.bufnr, item.data.line, item.data.line + 1, true, { line })
-  end
 end
 
 return TagsSourceBase

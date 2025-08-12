@@ -1,52 +1,66 @@
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 local log = require "obsidian.log"
 local legacycommands = require "obsidian.commands.init-legacy"
-
-local cmds = {
-  "backlinks",
-  "check",
-  "dailies",
-  "debug",
-  "extract_note",
-  "follow_link",
-  "link",
-  "link_new",
-  "links",
-  "new",
-  "new_from_template",
-  "open",
-  "paste_img",
-  "quick_switch",
-  "rename",
-  "search",
-  "tags",
-  "template",
-  "toc",
-  "today",
-  "toggle_checkbox",
-  "tomorrow",
-  "workspace",
-  "yesterday",
-}
-
--- TODO: this will be context-sensitive in the future
-local function show_menu()
-  vim.ui.select(cmds, { prompt = "Obsidian Commands" }, function(item)
-    if item then
-      return vim.cmd.Obsidian(item)
-    else
-      vim.notify("Aborted", 3)
-    end
-  end)
-end
+local search = require "obsidian.search"
 
 local M = { commands = {} }
+
+local function in_note()
+  return vim.bo.filetype == "markdown"
+end
+
+---@param commands obsidian.CommandConfig[]
+---@param is_visual boolean
+---@param is_note boolean
+---@return string[]
+local function get_commands_by_context(commands, is_visual, is_note)
+  local choices = vim.tbl_values(commands)
+  return vim
+    .iter(choices)
+    :filter(function(config)
+      if is_visual then
+        return config.range ~= nil
+      else
+        return config.range == nil
+      end
+    end)
+    :filter(function(config)
+      if is_note then
+        return true
+      else
+        return not config.note_action
+      end
+    end)
+    :map(function(config)
+      return config.name
+    end)
+    :totable()
+end
+
+local function show_menu(data)
+  local is_visual, is_note = data.range ~= 0, in_note()
+  local choices = get_commands_by_context(M.commands, is_visual, is_note)
+
+  vim.ui.select(
+    choices,
+    { prompt = "Obsidian Commands" },
+    vim.schedule_wrap(function(item)
+      if item then
+        return vim.cmd.Obsidian(item)
+      else
+        vim.notify("Aborted", 3)
+      end
+    end)
+  )
+end
 
 ---@class obsidian.CommandConfig
 ---@field complete function|string|?
 ---@field nargs string|integer|?
 ---@field range boolean|?
 ---@field func function|? (obsidian.Client, table) -> nil
+---@field name string?
+---@field note_action boolean?
 
 ---Register a new command.
 ---@param name string
@@ -58,6 +72,7 @@ M.register = function(name, config)
       return mod(client, data)
     end
   end
+  config.name = name
   M.commands[name] = config
 end
 
@@ -67,7 +82,7 @@ end
 M.install = function(client)
   vim.api.nvim_create_user_command("Obsidian", function(data)
     if #data.fargs == 0 then
-      show_menu()
+      show_menu(data)
       return
     end
     M.handle_command(client, data)
@@ -128,12 +143,13 @@ M.get_completions = function(client, cmdline)
   local splitcmd = vim.split(cmdline, " ", { plain = true, trimempty = true })
   local obsidiancmd = splitcmd[2]
   if cmdline:match(obspat .. "%s$") then
-    return cmds
+    local is_visual = vim.startswith(cmdline, "'<,'>")
+    return get_commands_by_context(M.commands, is_visual, in_note())
   end
   if cmdline:match(obspat .. "%s%S+$") then
     return vim.tbl_filter(function(s)
       return s:sub(1, #obsidiancmd) == obsidiancmd
-    end, cmds)
+    end, vim.tbl_keys(M.commands))
   end
   local cmdconfig = M.commands[obsidiancmd]
   if cmdconfig == nil then
@@ -143,7 +159,7 @@ M.get_completions = function(client, cmdline)
     local cmd_arg = table.concat(vim.list_slice(splitcmd, 3), " ")
     local complete_type = type(cmdconfig.complete)
     if complete_type == "function" then
-      return cmdconfig.complete(client, cmd_arg)
+      return cmdconfig.complete(cmd_arg)
     end
     if complete_type == "string" then
       return vim.fn.getcompletion(cmd_arg, cmdconfig.complete)
@@ -152,9 +168,8 @@ M.get_completions = function(client, cmdline)
 end
 
 --TODO: Note completion is currently broken (see: https://github.com/epwalsh/obsidian.nvim/issues/753)
----@param client obsidian.Client
 ---@return string[]
-M.note_complete = function(client, cmd_arg)
+M.note_complete = function(cmd_arg)
   local query
   if string.len(cmd_arg) > 0 then
     if string.find(cmd_arg, "|", 1, true) then
@@ -182,14 +197,14 @@ M.note_complete = function(client, cmd_arg)
 
   local completions = {}
   local query_lower = string.lower(query)
-  for note in iter(client:find_notes(query, { search = { sort = true } })) do
-    local note_path = assert(client:vault_relative_path(note.path, { strict = true }))
+  for note in iter(search.find_notes(query, { search = { sort = true } })) do
+    local note_path = assert(note.path:vault_relative_path { strict = true })
     if string.find(string.lower(note:display_name()), query_lower, 1, true) then
-      table.insert(completions, note:display_name() .. "  " .. note_path)
+      table.insert(completions, note:display_name() .. "  " .. tostring(note_path))
     else
       for _, alias in pairs(note.aliases) do
         if string.find(string.lower(alias), query_lower, 1, true) then
-          table.insert(completions, alias .. "  " .. note_path)
+          table.insert(completions, alias .. "  " .. tostring(note_path))
           break
         end
       end
@@ -198,6 +213,10 @@ M.note_complete = function(client, cmd_arg)
 
   return completions
 end
+
+------------------------
+---- general action ----
+------------------------
 
 M.register("check", { nargs = 0 })
 
@@ -209,42 +228,44 @@ M.register("tomorrow", { nargs = 0 })
 
 M.register("dailies", { nargs = "*" })
 
-M.register("new", { nargs = "?", complete = "file" })
+M.register("new", { nargs = "?" })
 
 M.register("open", { nargs = "?", complete = M.note_complete })
 
-M.register("backlinks", { nargs = 0 })
-
-M.register("tags", { nargs = "*", range = true })
+M.register("tags", { nargs = "*" })
 
 M.register("search", { nargs = "?" })
 
-M.register("template", { nargs = "?" })
-
-M.register("new_from_template", { nargs = "?" })
+M.register("new_from_template", { nargs = "*" })
 
 M.register("quick_switch", { nargs = "?" })
 
-M.register("link_new", { nargs = "?", range = true })
-
-M.register("link", { nargs = "?", range = true, complete = M.note_complete })
-
-M.register("links", { nargs = 0 })
-
-M.register("follow_link", { nargs = "?" })
-
-M.register("toggle_checkbox", { nargs = 0, range = true })
-
 M.register("workspace", { nargs = "?" })
 
-M.register("rename", { nargs = "?", complete = "file" })
+---------------------
+---- note action ----
+---------------------
 
-M.register("paste_img", { nargs = "?", complete = "file" })
+M.register("backlinks", { nargs = 0, note_action = true })
 
-M.register("extract_note", { nargs = "?", range = true })
+M.register("template", { nargs = "?", note_action = true })
 
-M.register("debug", { nargs = 0 })
+M.register("link_new", { mode = "v", nargs = "?", range = true, note_action = true })
 
-M.register("toc", { nargs = 0 })
+M.register("link", { nargs = "?", range = true, complete = M.note_complete, note_action = true })
+
+M.register("links", { nargs = 0, note_action = true })
+
+M.register("follow_link", { nargs = "?", note_action = true })
+
+M.register("toggle_checkbox", { nargs = 0, range = true, note_action = true })
+
+M.register("rename", { nargs = "?", note_action = true })
+
+M.register("paste_img", { nargs = "?", note_action = true })
+
+M.register("extract_note", { mode = "v", nargs = "?", range = true, note_action = true })
+
+M.register("toc", { nargs = 0, note_action = true })
 
 return M

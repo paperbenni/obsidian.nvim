@@ -1,13 +1,11 @@
 <h1 align="center">obsidian.nvim</h1>
 
-<div><h4 align="center"><a href="#setup">Setup</a> · <a href="#configuration-options">Configure</a> · <a href="#contributing">Contribute</a> · <a href="https://github.com/obsidian-nvim/obsidian.nvim/discussions">Discuss</a></h4></div>
-
 <div align="center">
 <a href="https://github.com/obsidian-nvim/obsidian.nvim/releases/latest">
   <img alt="Latest release" src="https://img.shields.io/github/v/release/obsidian-nvim/obsidian.nvim?style=for-the-badge&logo=starship&logoColor=D9E0EE&labelColor=302D41&&color=d9b3ff&include_prerelease&sort=semver" />
-</a> 
+</a>
 <a href="https://github.com/obsidian-nvim/obsidian.nvim/pulse">
-  <img alt="Last commit" src="https://img.shields.io/github/last-commit/obsidian-nvim/obsidian.nvim?style=for-the-badge&logo=github&logoColor=D9E0EE&labelColor=302D41&color=9fdf9f"/></a> 
+  <img alt="Last commit" src="https://img.shields.io/github/last-commit/obsidian-nvim/obsidian.nvim?style=for-the-badge&logo=github&logoColor=D9E0EE&labelColor=302D41&color=9fdf9f"/></a>
 <a href="https://github.com/neovim/neovim/releases/latest">
   <img alt="Latest Neovim" src="https://img.shields.io/github/v/release/neovim/neovim?style=for-the-badge&logo=neovim&logoColor=D9E0EE&label=Neovim&labelColor=302D41&color=99d6ff&sort=semver" />
 </a>
@@ -15,7 +13,13 @@
   <img alt="Made with Lua" src="https://img.shields.io/badge/Built%20with%20Lua-grey?style=for-the-badge&logo=lua&logoColor=D9E0EE&label=Lua&labelColor=302D41&color=b3b3ff">
 </a>
 <a href="https://dotfyle.com/plugins/obsidian-nvim/obsidian.nvim">
-	<img src="https://dotfyle.com/plugins/obsidian-nvim/obsidian.nvim/shield?style=for-the-badge" />
+ <img src="https://dotfyle.com/plugins/obsidian-nvim/obsidian.nvim/shield?style=for-the-badge" />
+</a>
+<a href="https://github.com/obsidian-nvim/obsidian.nvim?tab=readme-ov-file#-contributing">
+ <img src="https://img.shields.io/github/all-contributors/obsidian-nvim/obsidian.nvim?style=for-the-badge" />
+</a>
+<a href="https://github.com/orgs/obsidian-nvim/discussions">
+ <img alt="GitHub Discussions" src="https://img.shields.io/github/discussions/obsidian-nvim/obsidian.nvim?style=for-the-badge">
 </a>
 </div>
 <hr>
@@ -48,29 +52,37 @@ The fork aims to stay close to the original, but fix bugs, include and merge use
 
 📈 **Status:** See note status in statusline like obsidian app.
 
-💅 **Syntax:** Additional markdown syntax highlighting, concealing, and extmarks for references, tags, and check-boxes.
+### Keymaps
 
-[![See this screenshot](https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687)](https://github.com/epwalsh/obsidian.nvim/assets/8812459/e74f5267-21b5-49bc-a3bb-3b9db5fa6687)
-
-## Keymaps
-
-These default keymaps will only be set if you are in a valid workspace and a markdown buffer:
-
-- `smart_action` is the most important one you will use, it is bind to `<CR>` by default, it will
+- `smart_action`, bind to `<CR>` will:
   - If cursor is on a link, follow the link
   - If cursor is on a tag, show all notes with that tag in a picker
   - If cursor is on a checkbox, toggle the checkbox
   - If cursor is on a heading, cycle the fold of that heading
-- `gf`: Follow link under the cursor, falls back to normal vim `gf` if not on a link
-- `<leader>ch>`: Toggle check-boxes
+- `nav_link`, bind to `[o` and `]o` will navigate cursor to next valid link in the buffer.
+
+For remapping and creating your own mappings, see [Keymaps](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps)
 
 ### Commands
+
+There's one entry point user command for this plugin: `Obsidian`
+
+- `Obsidian<CR>` (`<enter>`) to select sub commands.
+- `Obsidian <Tab>` to get completion for sub commands.
+- Sub commands are context sensitive, meaning some actions will only appear when:
+  - you are in a note.
+  - you are in visual mode.
+- See [Commands](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Commands) for more info.
+
+**List of available commands:**
 
 - `:Obsidian backlinks` for getting a picker list of references to the current buffer.
 
 - `:Obsidian dailies [OFFSET ...]` to open a picker list of daily notes. For example, `:Obsidian dailies -2 1` to list daily notes from 2 days ago until tomorrow.
 
-- `:Obsidian follow_link [vsplit|hsplit]` to follow a note reference under the cursor, optionally opening it in a vertical or horizontal split.
+- `:Obsidian extract_note [TITLE]` to extract the visually selected text into a new note and link to it.
+
+- `:Obsidian follow_link [vsplit|hsplit|vsplit_force|hsplit_force]` to follow a note reference under the cursor, optionally opening it in a vertical or horizontal split.
 
 - `:Obsidian link [QUERY]` to link an inline visual selection of text to a note.
   One optional argument: a query that will be used to resolve the note by ID, path, or alias. If not given, the selected text will be used as the query.
@@ -83,14 +95,17 @@ These default keymaps will only be set if you are in a valid workspace and a mar
 - `:Obsidian new [TITLE]` to create a new note.
   One optional argument: the title of the new note.
 
-- `:Obsidian new_from_template [TITLE]` to create a new note from a template in the templates folder. Selecting from a list using your preferred picker.
+- `:Obsidian new_from_template [TITLE] [TEMPLATE]` to create a new note with `TITLE` from a template with the name `TEMPLATE`.
+  Both arguments are optional. If not given, the template will be selected from a list using your preferred picker.
 
 - `:Obsidian open [QUERY]` to open a note in the Obsidian app.
   One optional argument: a query used to resolve the note to open by ID, path, or alias. If not given, the current buffer is used.
 
+- `:Obsidian paste_img [IMGNAME]` to paste an image from the clipboard into the note at the cursor position by saving it to the vault and adding a markdown image link. You can configure the default folder to save images to with the `attachments.img_folder` option. See [Images](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images#change-image-save-location).
+
 - `:Obsidian quick_switch` to quickly switch to another note in your vault, searching by its name with a picker.
 
-- `:Obsidian rename [NEWNAME] [--dry-run]` to rename the note of the current buffer or reference under the cursor, updating all backlinks across the vault. It is highly recommended to commit the current state of your vault (if you're using version control) before running it, or doing a dry-run first by `:Obsidian rename new-id --dry-run`.
+- `:Obsidian rename [NEWNAME]` to rename the note of the current buffer or reference under the cursor, updating all backlinks across the vault. It will run `:wa` before renaming, and load every note with backlinks into your buffer-list, then you need to do `:wa` after for changes to take effect. Alternatively, call `vim.lsp.buf.rename` or use `grn`.
 
 - `:Obsidian search [QUERY]` to search for (or create) notes in your vault using `ripgrep` with your preferred picker.
 
@@ -125,26 +140,30 @@ These default keymaps will only be set if you are in a valid workspace and a mar
   - Frontend: a picker, see [Plugin dependencies](#plugin-dependencies)
 
 - Additional system dependencies:
-
   - **Windows WSL** users need [`wsl-open`](https://gitlab.com/4U6U57/wsl-open) for `:Obsidian open`.
   - **MacOS** users need [`pngpaste`](https://github.com/jcsalterego/pngpaste) (`brew install pngpaste`) for `:Obsidian paste_img`.
   - **Linux** users need xclip (X11) or wl-clipboard (Wayland) for `:Obsidian paste_img`.
 
 ### Plugin dependencies
 
-The only **required** plugin dependency is [plenary.nvim](https://github.com/nvim-lua/plenary.nvim), but there are a number of optional dependencies that enhance the obsidian.nvim experience.
+There's no required dependency, but there are a number of optional dependencies that enhance the obsidian.nvim experience.
 
 **Completion:**
 
-- **[recommended]** [hrsh7th/nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
+- **[recommended]** [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
 - [blink.cmp](https://github.com/Saghen/blink.cmp) (new)
 
 **Pickers:**
 
-- **[recommended]** [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- [ibhagwan/fzf-lua](https://github.com/ibhagwan/fzf-lua)
-- [Mini.Pick](https://github.com/echasnovski/mini.pick) from the mini.nvim library
-- [Snacks.Picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md) from the snacks.nvim library
+- **[recommended]** [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua)
+- [mini.pick](https://github.com/echasnovski/mini.pick)
+- [snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
+
+**Image viewing:**
+
+- [snacks.image](https://github.com/folke/snacks.nvim/blob/main/docs/image.md)
+- See [Images](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images) for configuration.
 
 **Syntax highlighting:**
 
@@ -152,7 +171,7 @@ See [syntax highlighting](#syntax-highlighting) for more details.
 
 - For base syntax highlighting:
   - **[recommended]** [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
-  - [preservim/vim-markdown](https://github.com/preservim/vim-markdown)
+  - [vim-markdown](https://github.com/preservim/vim-markdown)
 - For additional syntax features:
   - [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
   - [markview.nvim](https://github.com/OXY2DEV/markview.nvim)
@@ -190,14 +209,8 @@ return {
   --   "BufReadPre path/to/my-vault/*.md",
   --   "BufNewFile path/to/my-vault/*.md",
   -- },
-  dependencies = {
-    -- Required.
-    "nvim-lua/plenary.nvim",
-
-    -- see above for full list of optional dependencies ☝️
-  },
   ---@module 'obsidian'
-  ---@type obsidian.config.ClientOpts
+  ---@type obsidian.config
   opts = {
     workspaces = {
       {
@@ -223,43 +236,6 @@ return {
 
 ```vim
 :Rocks install obsidian
-```
-
-</details>
-
-### Using [`packer.nvim`](https://github.com/wbthomason/packer.nvim)
-
-It is not recommended because packer.nvim is currently unmaintained
-
-<details><summary>Click for install snippet</summary>
-
-```lua
-use {
-  "obsidian-nvim/obsidian.nvim",
-  tag = "*", -- recommended, use latest release instead of latest commit
-  requires = {
-    -- Required.
-    "nvim-lua/plenary.nvim",
-
-    -- see above for full list of optional dependencies ☝️
-  },
-  config = function()
-    require("obsidian").setup {
-      workspaces = {
-        {
-          name = "personal",
-          path = "~/vaults/personal",
-        },
-        {
-          name = "work",
-          path = "~/vaults/work",
-        },
-      },
-
-      -- see below for full list of options 👇
-    }
-  end,
-}
 ```
 
 </details>
@@ -327,32 +303,8 @@ require("obsidian").setup {
     blink = false,
     -- Trigger completion at 2 chars.
     min_chars = 2,
-  },
-
-  -- Optional, configure key mappings. These are the defaults. If you don't want to set any keymappings this
-  -- way then set 'mappings = {}'.
-  mappings = {
-    -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
-    ["gf"] = {
-      action = function()
-        return require("obsidian").util.gf_passthrough()
-      end,
-      opts = { noremap = false, expr = true, buffer = true },
-    },
-    -- Toggle check-boxes.
-    ["<leader>ch"] = {
-      action = function()
-        return require("obsidian").util.toggle_checkbox()
-      end,
-      opts = { buffer = true },
-    },
-    -- Smart action depending on context: follow link, show notes with tag, toggle checkbox, or toggle heading fold
-    ["<cr>"] = {
-      action = function()
-        return require("obsidian").util.smart_action()
-      end,
-      opts = { buffer = true, expr = true },
-    },
+    -- Set to false to disable new note creation in the picker
+    create_new = true,
   },
 
   -- Where to put new notes. Valid options are
@@ -366,7 +318,8 @@ require("obsidian").setup {
   note_id_func = function(title)
     -- Create note IDs in a Zettelkasten format with a timestamp and a suffix.
     -- In this case a note with the title 'My new note' will be given an ID that looks
-    -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'
+    -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'.
+    -- You may have as many periods in the note ID as you'd like—the ".md" will be added automatically
     local suffix = ""
     if title ~= nil then
       -- If title is given, transform it into valid file name.
@@ -437,8 +390,14 @@ require("obsidian").setup {
     folder = "templates",
     date_format = "%Y-%m-%d",
     time_format = "%H:%M",
-    -- A map for custom variables, the key should be the variable and the value a function
+    -- A map for custom variables, the key should be the variable and the value a function.
+    -- Functions are called with obsidian.TemplateContext objects as their sole parameter.
+    -- See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Template#substitutions
     substitutions = {},
+
+    -- A map for configuring unique directories and paths for specific templates
+    --- See: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Template#customizations
+    customizations = {},
   },
 
   -- Sets how you follow URLs
@@ -451,16 +410,21 @@ require("obsidian").setup {
   -- Sets how you follow images
   ---@param img string
   follow_img_func = function(img)
-    vim.ui.open(url)
-    -- vim.ui.open(url, { cmd = { "loupe" } })
+    vim.ui.open(img)
+    -- vim.ui.open(img, { cmd = { "loupe" } })
   end,
 
-  -- Optional, set to true if you use the Obsidian Advanced URI plugin.
-  -- https://github.com/Vinzent03/obsidian-advanced-uri
-  use_advanced_uri = false,
-
-  -- Optional, set to true to force ':Obsidian open' to bring the app to the foreground.
-  open_app_foreground = false,
+  ---@class obsidian.config.OpenOpts
+  ---
+  ---Opens the file with current line number
+  ---@field use_advanced_uri? boolean
+  ---
+  ---Function to do the opening, default to vim.ui.open
+  ---@field func? fun(uri: string)
+  open = {
+    use_advanced_uri = false,
+    func = vim.ui.open,
+  },
 
   picker = {
     -- Set your preferred picker. Can be one of 'telescope.nvim', 'fzf-lua', 'mini.pick' or 'snacks.pick'.
@@ -481,6 +445,13 @@ require("obsidian").setup {
     },
   },
 
+  -- Optional, by default, `:ObsidianBacklinks` parses the header under
+  -- the cursor. Setting to `false` will get the backlinks for the current
+  -- note instead. Doesn't affect other link behaviour.
+  backlinks = {
+    parse_headers = true,
+  },
+
   -- Optional, sort search results by "path", "modified", "accessed", or "created".
   -- The recommend value is "modified" and `true` for `sort_reversed`, which means, for example,
   -- that `:Obsidian quick_switch` will show the notes sorted by latest modified time
@@ -492,8 +463,10 @@ require("obsidian").setup {
 
   -- Optional, determines how certain commands open notes. The valid options are:
   -- 1. "current" (the default) - to always open in the current window
-  -- 2. "vsplit" - to open in a vertical split if there's not already a vertical split
-  -- 3. "hsplit" - to open in a horizontal split if there's not already a horizontal split
+  -- 2. "vsplit" - only open in a vertical split if a vsplit does not exist.
+  -- 3. "hsplit" - only open in a horizontal split if a hsplit does not exist.
+  -- 4. "vsplit_force" - always open a new vertical split if the file is not in the adjacent vsplit.
+  -- 5. "hsplit_force" - always open a new horizontal split if the file is not in the adjacent hsplit.
   open_notes_in = "current",
 
   -- Optional, define your own callbacks to further customize behavior.
@@ -518,15 +491,15 @@ require("obsidian").setup {
     pre_write_note = function(client, note) end,
 
     -- Runs anytime the workspace is set/changed.
-    ---@param client obsidian.Client
     ---@param workspace obsidian.Workspace
-    post_set_workspace = function(client, workspace) end,
+    post_set_workspace = function(workspace) end,
   },
 
   -- Optional, configure additional syntax highlighting / extmarks.
   -- This requires you have `conceallevel` set to 1 or 2. See `:help conceallevel` for more details.
   ui = {
     enable = true, -- set to false to disable all additional syntax features
+    ignore_conceal_warn = false, -- set to true to disable conceallevel specific warning
     update_debounce = 200, -- update delay after a text change (in milliseconds)
     max_file_length = 5000, -- disable UI features for files with more than this many lines
     -- Define how various check-boxes are displayed
@@ -568,36 +541,51 @@ require("obsidian").setup {
     },
   },
 
-  -- Specify how to handle attachments.
+  ---@class obsidian.config.AttachmentsOpts
+  ---
+  ---Default folder to save images to, relative to the vault root.
+  ---@field img_folder? string
+  ---
+  ---Default name for pasted images
+  ---@field img_name_func? fun(): string
+  ---
+  ---Default text to insert for pasted images, for customizing, see: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images
+  ---@field img_text_func? fun(path: obsidian.Path): string
+  ---
+  ---Whether to confirm the paste or not. Defaults to true.
+  ---@field confirm_img_paste? boolean
   attachments = {
-    -- The default folder to place images in via `:Obsidian paste_img`.
-    -- If this is a relative path it will be interpreted as relative to the vault root.
-    -- You can always override this per image by passing a full path to the command instead of just a filename.
-    img_folder = "assets/imgs", -- This is the default
-
-    -- A function that determines default name or prefix when pasting images via `:Obsidian paste_img`.
-    ---@return string
+    img_folder = "assets/imgs",
     img_name_func = function()
-      -- Prefix image names with timestamp.
       return string.format("Pasted image %s", os.date "%Y%m%d%H%M%S")
     end,
-
-    -- A function that determines the text to insert in the note when pasting an image.
-    -- It takes two arguments, the `obsidian.Client` and an `obsidian.Path` to the image file.
-    -- This is the default implementation.
-    ---@param client obsidian.Client
-    ---@param path obsidian.Path the absolute path to the image file
-    ---@return string
-    img_text_func = function(client, path)
-      path = client:vault_relative_path(path) or path
-      return string.format("![%s](%s)", path.name, path)
-    end,
+    confirm_img_paste = true,
   },
 
-  -- See https://github.com/obsidian-nvim/obsidian.nvim/wiki/Notes-on-configuration#statusline-component
+  ---@deprecated in favor of the footer option below
   statusline = {
     enabled = true,
     format = "{{properties}} properties {{backlinks}} backlinks {{words}} words {{chars}} chars",
+  },
+
+  ---@class obsidian.config.FooterOpts
+  ---
+  ---@field enabled? boolean
+  ---@field format? string
+  ---@field hl_group? string
+  ---@field separator? string|false Set false to disable separator; set an empty string to insert a blank line separator.
+  footer = {
+    enabled = true,
+    format = "{{backlinks}} backlinks  {{properties}} properties  {{words}} words  {{chars}} chars",
+    hl_group = "Comment",
+    separator = string.rep("-", 80),
+  },
+  ---@class obsidian.config.CheckboxOpts
+  ---
+  ---Order of checkbox state chars, e.g. { " ", "x" }
+  ---@field order? string[]
+  checkbox = {
+    order = { " ", "~", "!", ">", "x" },
   },
 }
 ```
@@ -611,6 +599,68 @@ See the [obsidian.nvim wiki](https://github.com/obsidian-nvim/obsidian.nvim/wiki
 ## 🤝 Contributing
 
 Please read the [CONTRIBUTING](https://github.com/obsidian-nvim/obsidian.nvim/blob/main/CONTRIBUTING.md) guide before submitting a pull request.
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/neo451"><img src="https://avatars.githubusercontent.com/u/111681693?v=4?s=100" width="100px;" alt="neo451"/><br /><sub><b>neo451</b></sub></a><br /><a href="#code-neo451" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sotte"><img src="https://avatars.githubusercontent.com/u/79138?v=4?s=100" width="100px;" alt="Stefan Otte"/><br /><sub><b>Stefan Otte</b></sub></a><br /><a href="#code-sotte" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/guspix"><img src="https://avatars.githubusercontent.com/u/33852783?v=4?s=100" width="100px;" alt="guspix"/><br /><sub><b>guspix</b></sub></a><br /><a href="#code-guspix" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ffricken"><img src="https://avatars.githubusercontent.com/u/44709001?v=4?s=100" width="100px;" alt="ffricken"/><br /><sub><b>ffricken</b></sub></a><br /><a href="#code-ffricken" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ErlanRG"><img src="https://avatars.githubusercontent.com/u/32745670?v=4?s=100" width="100px;" alt="Erlan Rangel"/><br /><sub><b>Erlan Rangel</b></sub></a><br /><a href="#code-ErlanRG" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bosvik"><img src="https://avatars.githubusercontent.com/u/132846580?v=4?s=100" width="100px;" alt="bosvik"/><br /><sub><b>bosvik</b></sub></a><br /><a href="#code-bosvik" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://alemann.dev"><img src="https://avatars.githubusercontent.com/u/58050402?v=4?s=100" width="100px;" alt="Jost Alemann"/><br /><sub><b>Jost Alemann</b></sub></a><br /><a href="#doc-ddogfoodd" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ottersome"><img src="https://avatars.githubusercontent.com/u/9465391?v=4?s=100" width="100px;" alt="Luis Garcia"/><br /><sub><b>Luis Garcia</b></sub></a><br /><a href="#code-ottersome" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jblsp"><img src="https://avatars.githubusercontent.com/u/48526917?v=4?s=100" width="100px;" alt="Joe"/><br /><sub><b>Joe</b></sub></a><br /><a href="#code-jblsp" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/horiagug"><img src="https://avatars.githubusercontent.com/u/23277222?v=4?s=100" width="100px;" alt="Horia Gug"/><br /><sub><b>Horia Gug</b></sub></a><br /><a href="#code-horiagug" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.linkedin.com/in/aquilesgomez"><img src="https://avatars.githubusercontent.com/u/20983181?v=4?s=100" width="100px;" alt="Aquiles Gomez"/><br /><sub><b>Aquiles Gomez</b></sub></a><br /><a href="#code-aquilesg" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/alvarosevilla95"><img src="https://avatars.githubusercontent.com/u/1376447?v=4?s=100" width="100px;" alt="Alvaro Sevilla"/><br /><sub><b>Alvaro Sevilla</b></sub></a><br /><a href="#code-alvarosevilla95" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sstark"><img src="https://avatars.githubusercontent.com/u/837918?v=4?s=100" width="100px;" alt="Sebastian Stark"/><br /><sub><b>Sebastian Stark</b></sub></a><br /><a href="#code-sstark" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Peeeaje"><img src="https://avatars.githubusercontent.com/u/74146834?v=4?s=100" width="100px;" alt="Jumpei Yamakawa"/><br /><sub><b>Jumpei Yamakawa</b></sub></a><br /><a href="#code-Peeeaje" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/marcocofano"><img src="https://avatars.githubusercontent.com/u/63420833?v=4?s=100" width="100px;" alt="marcocofano"/><br /><sub><b>marcocofano</b></sub></a><br /><a href="#code-marcocofano" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jaehaks"><img src="https://avatars.githubusercontent.com/u/26200835?v=4?s=100" width="100px;" alt="Jaehaks"/><br /><sub><b>Jaehaks</b></sub></a><br /><a href="#code-Jaehaks" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/magnusriga/"><img src="https://avatars.githubusercontent.com/u/38915578?v=4?s=100" width="100px;" alt="Magnus"/><br /><sub><b>Magnus</b></sub></a><br /><a href="#code-magnusriga" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/noamsto"><img src="https://avatars.githubusercontent.com/u/17932324?v=4?s=100" width="100px;" alt="Noam Stolero"/><br /><sub><b>Noam Stolero</b></sub></a><br /><a href="#code-noamsto" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/aileot"><img src="https://avatars.githubusercontent.com/u/46470475?v=4?s=100" width="100px;" alt="aileot"/><br /><sub><b>aileot</b></sub></a><br /><a href="#code-aileot" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://ricostacruz.com/"><img src="https://avatars.githubusercontent.com/u/74385?v=4?s=100" width="100px;" alt="Rico Sta. Cruz"/><br /><sub><b>Rico Sta. Cruz</b></sub></a><br /><a href="#doc-rstacruz" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hnjae"><img src="https://avatars.githubusercontent.com/u/42675338?v=4?s=100" width="100px;" alt="KIM Hyunjae"/><br /><sub><b>KIM Hyunjae</b></sub></a><br /><a href="#code-hnjae" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bburgess19"><img src="https://avatars.githubusercontent.com/u/55334507?v=4?s=100" width="100px;" alt="Ben Burgess"/><br /><sub><b>Ben Burgess</b></sub></a><br /><a href="#code-bburgess19" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://sebszyller.com"><img src="https://avatars.githubusercontent.com/u/11989990?v=4?s=100" width="100px;" alt="Sebastian Szyller"/><br /><sub><b>Sebastian Szyller</b></sub></a><br /><a href="#code-sebszyller" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://nobe4.fr"><img src="https://avatars.githubusercontent.com/u/2452791?v=4?s=100" width="100px;" alt="nobe4"/><br /><sub><b>nobe4</b></sub></a><br /><a href="#code-nobe4" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Anaritus"><img src="https://avatars.githubusercontent.com/u/61704392?v=4?s=100" width="100px;" alt="Anaritus"/><br /><sub><b>Anaritus</b></sub></a><br /><a href="#code-Anaritus" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mdavis36"><img src="https://avatars.githubusercontent.com/u/25917313?v=4?s=100" width="100px;" alt="Michael Davis"/><br /><sub><b>Michael Davis</b></sub></a><br /><a href="#code-mdavis36" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://brianrodri.com"><img src="https://avatars.githubusercontent.com/u/5094060?v=4?s=100" width="100px;" alt="Brian Rodriguez"/><br /><sub><b>Brian Rodriguez</b></sub></a><br /><a href="#code-brianrodri" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/carschandler"><img src="https://avatars.githubusercontent.com/u/92899389?v=4?s=100" width="100px;" alt="carschandler"/><br /><sub><b>carschandler</b></sub></a><br /><a href="#doc-carschandler" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://escapewindow.com"><img src="https://avatars.githubusercontent.com/u/826343?v=4?s=100" width="100px;" alt="Aki Sasaki"/><br /><sub><b>Aki Sasaki</b></sub></a><br /><a href="#code-escapewindow" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/rim18/"><img src="https://avatars.githubusercontent.com/u/5428479?v=4?s=100" width="100px;" alt="Reinaldo Molina"/><br /><sub><b>Reinaldo Molina</b></sub></a><br /><a href="#code-tricktux" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/srackham"><img src="https://avatars.githubusercontent.com/u/674468?v=4?s=100" width="100px;" alt="Stuart Rackham"/><br /><sub><b>Stuart Rackham</b></sub></a><br /><a href="#code-srackham" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://redoxahmii.vercel.app"><img src="https://avatars.githubusercontent.com/u/13983258?v=4?s=100" width="100px;" alt="Ahmed Mughal"/><br /><sub><b>Ahmed Mughal</b></sub></a><br /><a href="#code-redoxahmii" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/trash-panda-v91-beta"><img src="https://avatars.githubusercontent.com/u/42897550?v=4?s=100" width="100px;" alt="trash-panda-v91-beta"/><br /><sub><b>trash-panda-v91-beta</b></sub></a><br /><a href="#code-trash-panda-v91-beta" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://westhoffswelt.de"><img src="https://avatars.githubusercontent.com/u/160529?v=4?s=100" width="100px;" alt="Jakob Westhoff"/><br /><sub><b>Jakob Westhoff</b></sub></a><br /><a href="#code-jakobwesthoff" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/chrhjoh"><img src="https://avatars.githubusercontent.com/u/80620482?v=4?s=100" width="100px;" alt="Christian Johansen"/><br /><sub><b>Christian Johansen</b></sub></a><br /><a href="#code-chrhjoh" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/VVKot"><img src="https://avatars.githubusercontent.com/u/24480985?v=4?s=100" width="100px;" alt="Volodymyr Kot"/><br /><sub><b>Volodymyr Kot</b></sub></a><br /><a href="#code-VVKot" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://minusfive.com"><img src="https://avatars.githubusercontent.com/u/33695?v=4?s=100" width="100px;" alt="Jorge Villalobos"/><br /><sub><b>Jorge Villalobos</b></sub></a><br /><a href="#code-minusfive" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## ❤️ Acknowledgement
 

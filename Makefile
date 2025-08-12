@@ -3,18 +3,18 @@ SHELL:=/usr/bin/env bash
 .DEFAULT_GOAL:=help
 PROJECT_NAME = "obsidian.nvim"
 TEST = test/obsidian
+LUARC = $(shell readlink -f .luarc.json)
 
 # Depending on your setup you have to override the locations at runtime. E.g.:
-#   make test PLENARY=~/path/to/plenary.nvim
 #   make user-docs PANVIMDOC_PATH=~/path/to/panvimdoc/panvimdoc.sh
-PLENARY = ~/.local/share/nvim/lazy/plenary.nvim/
+MINITEST = deps/mini.test
 MINIDOC = ~/.local/share/nvim/lazy/mini.doc/
 PANVIMDOC_PATH = ../panvimdoc/panvimdoc.sh
 
 ################################################################################
 ##@ Start here
 .PHONY: chores
-chores: style lint test ## Run develoment tasks (lint, style, test); PRs must pass this.
+chores: style lint types test ## Run develoment tasks (lint, style, types, test); PRs must pass this.
 
 ################################################################################
 ##@ Developmment
@@ -26,18 +26,16 @@ lint: ## Lint the code with luacheck
 style:  ## Format the code with stylua
 	stylua --check .
 
-# TODO: add type checking with lua-ls
+types: ## Type check with lua-ls
+	lua-language-server --configpath "$(LUARC)" --check lua/obsidian/
 
 .PHONY: test
-test: $(PLENARY) ## Run unit tests
-	PLENARY=$(PLENARY) nvim \
-		--headless \
-		--noplugin \
-		-u test/minimal_init.vim \
-		-c "PlenaryBustedDirectory $(TEST) { minimal_init = './test/minimal_init.vim' }"
+test: $(MINITEST)
+	nvim --headless --noplugin -u ./scripts/minimal_init.lua -c "lua MiniTest.run()"
 
-$(PLENARY):
-	git clone --depth 1 https://github.com/nvim-lua/plenary.nvim.git $(PLENARY)
+$(MINITEST):
+	mkdir -p deps
+	git clone --filter=blob:none https://github.com/echasnovski/mini.test $(MINITEST)
 
 .PHONY: user-docs
 user-docs: ## Generate user documentation with panvimdoc
@@ -55,7 +53,6 @@ user-docs: ## Generate user documentation with panvimdoc
 		--dedup-subheadings false \
 		--shift-heading-level-by -1 \
 		--ignore-rawblocks true \
-		&& mv doc/obsidian.txt /tmp/
 
 .PHONY: api-docs
 api-docs: $(MINIDOC) ## Generate API documentation with mini.doc

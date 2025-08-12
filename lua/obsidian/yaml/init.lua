@@ -18,9 +18,6 @@ local should_quote = function(s)
   -- Check if it starts with a special character.
   if string.match(s, [[^["'\\[{&!-].*]]) then
     return true
-  -- Check if it looks like a number.
-  elseif string.match(s, "^[%d.-]+$") then
-    return true
   -- Check if it has a colon followed by whitespace.
   elseif string.find(s, ": ", 1, true) then
     return true
@@ -57,7 +54,7 @@ dumps = function(x, indent, order)
   if type(x) == "table" then
     local out = {}
 
-    if util.tbl_is_array(x) then
+    if util.islist(x) then
       for _, v in ipairs(x) do
         local item_lines = dumps(v, indent + 2)
         table.insert(out, indent_str .. "- " .. util.lstrip_whitespace(item_lines[1]))

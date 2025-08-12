@@ -1,7 +1,7 @@
 local Line = require "obsidian.yaml.line"
 local abc = require "obsidian.abc"
 local util = require "obsidian.util"
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 
 local m = {}
 
@@ -107,15 +107,15 @@ Parser.parse = function(self, str)
         if type(root_value) == "table" then
           parent = root_value
         end
-      elseif util.tbl_is_array(parent) and value_type == YamlType.ArrayItem then
+      elseif util.islist(parent) and value_type == YamlType.ArrayItem then
         -- Add value to parent array.
         parent[#parent + 1] = value
-      elseif util.tbl_is_mapping(parent) and value_type == YamlType.Mapping then
+      elseif type(parent) == "table" and value_type == YamlType.Mapping then
         assert(parent ~= nil) -- for type checking
         -- Add value to parent mapping.
         for key, item in pairs(value) do
           -- Check for duplicate keys.
-          if util.tbl_contains_key(parent, key) then
+          if parent[key] ~= nil then
             error(self:_error_msg("duplicate key '" .. key .. "' found in table", i, line.content))
           else
             parent[key] = item
@@ -226,7 +226,7 @@ Parser._try_parse_field = function(self, lines, i, text)
     _, _, key, value = string.find(text, "([a-zA-Z0-9_-]+[a-zA-Z0-9_ -]*): (.*)")
   end
 
-  value = value and util.strip_whitespace(value) or nil
+  value = value and vim.trim(value) or nil
   if value == "" then
     value = nil
   end
@@ -378,7 +378,7 @@ Parser._parse_mapping = function(self, i, lines)
       if value_type == YamlType.Mapping then
         for key, item in pairs(value) do
           -- Check for duplicate keys.
-          if util.tbl_contains_key(out, key) then
+          if out[key] ~= nil then
             error(self:_error_msg("duplicate key '" .. key .. "' found in table", i))
           else
             out[key] = item
@@ -512,7 +512,7 @@ Parser._parse_inline_mapping = function(self, i, text)
       return false, self:_error_msg("invalid inline mapping", i, text), nil
     end
     local value = self:_parse_inline_value(i, value_str)
-    if not util.tbl_contains_key(out, key) then
+    if out[key] == nil then
       out[key] = value
     else
       return false, self:_error_msg("duplicate key '" .. key .. "' found in inline mapping", i, text), nil
@@ -534,9 +534,9 @@ end
 Parser._parse_string = function(self, i, text)
   if vim.startswith(text, [["]]) and vim.endswith(text, [["]]) then
     -- when the text is enclosed with double-quotes we need to un-escape certain characters.
-    text = util.string_replace(text, [[\"]], [["]])
+    text = string.gsub(text, vim.pesc [[\"]], [["]])
   end
-  return true, nil, util.strip_enclosing_chars(util.strip_whitespace(text))
+  return true, nil, util.strip_enclosing_chars(vim.trim(text))
 end
 
 ---Parse a string value.
@@ -567,7 +567,7 @@ end
 ---@param text string
 ---@return number
 Parser.parse_number = function(self, text)
-  local ok, errmsg, res = self:_parse_number(1, util.strip_whitespace(util.strip_comments(text)))
+  local ok, errmsg, res = self:_parse_number(1, vim.trim(util.strip_comments(text)))
   if not ok then
     errmsg = errmsg and errmsg or self:_error_msg("failed to parse a number", 1, text)
     error(errmsg)
@@ -597,7 +597,7 @@ end
 ---@param text string
 ---@return boolean
 Parser.parse_boolean = function(self, text)
-  local ok, errmsg, res = self:_parse_boolean(1, util.strip_whitespace(util.strip_comments(text)))
+  local ok, errmsg, res = self:_parse_boolean(1, vim.trim(util.strip_comments(text)))
   if not ok then
     errmsg = errmsg and errmsg or self:_error_msg("failed to parse a boolean", 1, text)
     error(errmsg)
@@ -624,7 +624,7 @@ end
 ---@param text string
 ---@return vim.NIL|nil
 Parser.parse_null = function(self, text)
-  local ok, errmsg, res = self:_parse_null(1, util.strip_whitespace(util.strip_comments(text)))
+  local ok, errmsg, res = self:_parse_null(1, vim.trim(util.strip_comments(text)))
   if not ok then
     errmsg = errmsg and errmsg or self:_error_msg("failed to parse a null value", 1, text)
     error(errmsg)

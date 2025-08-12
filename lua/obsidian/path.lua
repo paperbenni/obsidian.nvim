@@ -10,7 +10,7 @@ end
 
 ---@param path table
 ---@param k string
----@param factory fun(obsidian.Path): any
+---@param factory fun(path: obsidian.Path): any
 local function cached_get(path, k, factory)
   local cache_key = "__" .. k
   local v = rawget(path, cache_key)
@@ -158,8 +158,6 @@ end
 ---
 ---@return obsidian.Path
 Path.new = function(...)
-  local util = require "obsidian.util"
-
   local self = Path.init()
 
   local args = { ... }
@@ -178,13 +176,6 @@ Path.new = function(...)
   end
 
   self.filename = vim.fs.normalize(tostring(arg))
-  -- On Windows, normalize 'c:/' to 'C:/'
-  if
-    (util.get_os() == util.OSType.Windows or util.get_os() == util.OSType.Wsl)
-    and string.match(self.filename, "^[%a]:/.*$")
-  then
-    self.filename = string.upper(string.sub(self.filename, 1, 1)) .. string.sub(self.filename, 2)
-  end
 
   return self
 end
@@ -196,21 +187,18 @@ end
 ---@return obsidian.Path
 Path.temp = function(opts)
   opts = opts or {}
-  -- os.tmpname gives us a temporary file, but we really want a temporary directory, so we
-  -- immediately delete that file.
-  local tmpname = os.tmpname()
-  os.remove(tmpname)
+  local tmpname = vim.fn.tempname()
   if opts.suffix then
     tmpname = tmpname .. opts.suffix
   end
   return Path.new(tmpname)
 end
 
---- Get a path corresponding to the current working directory as given by `vim.loop.cwd()`.
+--- Get a path corresponding to the current working directory as given by `vim.uv.cwd()`.
 ---
 ---@return obsidian.Path
 Path.cwd = function()
-  return assert(Path.new(vim.loop.cwd()))
+  return assert(Path.new(vim.uv.cwd()))
 end
 
 --- Get a path corresponding to a buffer.
@@ -238,16 +226,17 @@ end
 --- Return a new path with the suffix changed.
 ---
 ---@param suffix string
+---@param should_append boolean|? should the suffix append a suffix instead of replacing one which may be there?
 ---
 ---@return obsidian.Path
-Path.with_suffix = function(self, suffix)
+Path.with_suffix = function(self, suffix, should_append)
   if not vim.startswith(suffix, ".") and string.len(suffix) > 1 then
     error(string.format("invalid suffix '%s'", suffix))
   elseif self.stem == nil then
     error(string.format("path '%s' has no stem", self.filename))
   end
 
-  local new_name = self.stem .. suffix
+  local new_name = ((should_append == true) and self.name or self.stem) .. suffix
 
   ---@type obsidian.Path|?
   local parent = nil
@@ -266,11 +255,11 @@ end
 ---
 ---@return boolean
 Path.is_absolute = function(self)
-  local util = require "obsidian.util"
+  local api = require "obsidian.api"
   if
     vim.startswith(self.filename, "/")
     or (
-      (util.get_os() == util.OSType.Windows or util.get_os() == util.OSType.Wsl)
+      (api.get_os() == api.OSType.Windows or api.get_os() == api.OSType.Wsl)
       and string.match(self.filename, "^[%a]:/.*$")
     )
   then
@@ -283,22 +272,8 @@ end
 ---@param ... obsidian.Path|string
 ---@return obsidian.Path
 Path.joinpath = function(self, ...)
-  local args = { ... }
-  -- `vim.fs.joinpath` was introduced after neovim 0.9.*
-  -- for i, v in ipairs(args) do
-  --   args[i] = tostring(v)
-  -- end
-  -- return Path.new(vim.fs.joinpath(self.filename, unpack(args)))
-  local filename = self.filename
-  for _, v in ipairs(args) do
-    v = vim.fs.normalize(tostring(v))
-    if vim.startswith(v, "/") then
-      filename = filename .. v
-    else
-      filename = filename .. "/" .. v
-    end
-  end
-  return Path.new(filename)
+  local args = vim.iter({ ... }):map(tostring):totable()
+  return Path.new(vim.fs.joinpath(self.filename, unpack(args)))
 end
 
 --- Try to resolve a version of the path relative to the other.
@@ -350,11 +325,7 @@ end
 ---
 ---@return obsidian.Path[]
 Path.parents = function(self)
-  local parents = {}
-  for parent in vim.fs.parents(self.filename) do
-    table.insert(parents, Path.new(parent))
-  end
-  return parents
+  return vim.iter(vim.fs.parents(self.filename)):map(Path.new):totable()
 end
 
 --- Check if the path is a parent of other. This is a pure path method, so it only checks by
@@ -374,17 +345,16 @@ Path.is_parent_of = function(self, other)
   return false
 end
 
+---@return string?
+---@private
+Path.abspath = function(self)
+  local path = vim.loop.fs_realpath(vim.fn.resolve(self.filename))
+  return path
+end
+
 -------------------------------------------------------------------------------
 --- Concrete path methods.
 -------------------------------------------------------------------------------
-
----@return string|?
----@private
-Path.fs_realpath = function(self)
-  local path = vim.loop.fs_realpath(vim.fn.resolve(self.filename))
-  ---@cast path string|?
-  return path
-end
 
 --- Make the path absolute, resolving any symlinks.
 --- If `strict` is true and the path doesn't exist, an error is raised.
@@ -395,7 +365,7 @@ end
 Path.resolve = function(self, opts)
   opts = opts or {}
 
-  local realpath = self:fs_realpath()
+  local realpath = self:abspath()
   if realpath then
     return Path.new(realpath)
   elseif opts.strict then
@@ -406,7 +376,7 @@ Path.resolve = function(self, opts)
   -- does exist, and then put the path back together from there.
   local parents = self:parents()
   for _, parent in ipairs(parents) do
-    local parent_realpath = parent:fs_realpath()
+    local parent_realpath = parent:abspath()
     if parent_realpath then
       return Path.new(parent_realpath) / self:relative_to(parent)
     end
@@ -419,9 +389,9 @@ end
 ---
 ---@return table|?
 Path.stat = function(self)
-  local realpath = self:fs_realpath()
+  local realpath = self:abspath()
   if realpath then
-    local stat, _ = vim.loop.fs_stat(realpath)
+    local stat, _ = vim.uv.fs_stat(realpath)
     return stat
   end
 end
@@ -465,20 +435,12 @@ Path.mkdir = function(self, opts)
   opts = opts or {}
 
   local mode = opts.mode or 448 -- 0700 -> decimal
-  ---@diagnostic disable-next-line: undefined-field
-  if opts.exists_ok then -- for compat with the plenary.path API.
-    opts.exist_ok = true
-  end
 
   if self:is_dir() then
-    if not opts.exist_ok then
-      error("FileExistsError: " .. self.filename)
-    else
-      return
-    end
+    return
   end
 
-  if vim.loop.fs_mkdir(self.filename, mode) then
+  if vim.uv.fs_mkdir(self.filename, mode) then
     return
   end
 
@@ -504,38 +466,15 @@ Path.rmdir = function(self)
     return
   end
 
-  local ok, err_name, err_msg = vim.loop.fs_rmdir(resolved.filename)
+  local ok, err_name, err_msg = vim.uv.fs_rmdir(resolved.filename)
   if not ok then
     error(err_name .. ": " .. err_msg)
   end
 end
 
+-- TODO: not implemented and not used, after we get to 0.11 we can simply use vim.fs.rm
 --- Recursively remove an entire directory and its contents.
-Path.rmtree = function(self)
-  local scan = require "plenary.scandir"
-
-  local resolved = self:resolve { strict = true }
-  if not resolved:is_dir() then
-    error("NotADirectoryError: " .. resolved.filename)
-  end
-
-  -- First unlink all files.
-  scan.scan_dir(resolved.filename, {
-    hidden = true,
-    on_insert = function(file)
-      Path.new(file):unlink()
-    end,
-  })
-
-  -- Now iterate backwards to clean up remaining dirs.
-  local dirs = scan.scan_dir(resolved.filename, { add_dirs = true, hidden = true })
-  for i = #dirs, 1, -1 do
-    Path.new(dirs[i]):rmdir()
-  end
-
-  -- And finally remove the top level dir.
-  resolved:rmdir()
-end
+Path.rmtree = function(self) end
 
 --- Create a file at this given path.
 ---
@@ -547,7 +486,7 @@ Path.touch = function(self, opts)
   local resolved = self:resolve { strict = false }
   if resolved:exists() then
     local new_time = os.time()
-    vim.loop.fs_utime(resolved.filename, new_time, new_time)
+    vim.uv.fs_utime(resolved.filename, new_time, new_time)
     return
   end
 
@@ -556,11 +495,11 @@ Path.touch = function(self, opts)
     error("FileNotFoundError: " .. parent.filename)
   end
 
-  local fd, err_name, err_msg = vim.loop.fs_open(resolved.filename, "w", mode)
+  local fd, err_name, err_msg = vim.uv.fs_open(resolved.filename, "w", mode)
   if not fd then
     error(err_name .. ": " .. err_msg)
   end
-  vim.loop.fs_close(fd)
+  vim.uv.fs_close(fd)
 end
 
 --- Rename this file or directory to the given target.
@@ -572,7 +511,7 @@ Path.rename = function(self, target)
   local resolved = self:resolve { strict = false }
   target = Path.new(target)
 
-  local ok, err_name, err_msg = vim.loop.fs_rename(resolved.filename, target.filename)
+  local ok, err_name, err_msg = vim.uv.fs_rename(resolved.filename, target.filename)
   if not ok then
     error(err_name .. ": " .. err_msg)
   end
@@ -595,9 +534,34 @@ Path.unlink = function(self, opts)
     return
   end
 
-  local ok, err_name, err_msg = vim.loop.fs_unlink(resolved.filename)
+  local ok, err_name, err_msg = vim.uv.fs_unlink(resolved.filename)
   if not ok then
     error(err_name .. ": " .. err_msg)
+  end
+end
+
+--- Make a path relative to the vault root, if possible, return a string
+---
+---@param opts { strict: boolean|? }|?
+---
+---@return string?
+Path.vault_relative_path = function(self, opts)
+  opts = opts or {}
+
+  -- NOTE: we don't try to resolve the `path` here because that would make the path absolute,
+  -- which may result in the wrong relative path if the current working directory is not within
+  -- the vault.
+
+  local ok, relative_path = pcall(function()
+    return self:relative_to(Obsidian.workspace.root)
+  end)
+
+  if ok and relative_path then
+    return tostring(relative_path)
+  elseif not self:is_absolute() then
+    return tostring(self)
+  elseif opts.strict then
+    error(string.format("failed to resolve '%s' relative to vault root '%s'", self, Obsidian.workspace.root))
   end
 end
 

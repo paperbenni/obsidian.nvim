@@ -7,6 +7,128 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Fixed incorrect call signature for `options.callbacks.post_set_workspace`
+- Fixed incorrect fallback for `resolve_note`.
+- Fixed async with minimal functions copied from `vim._async`.
+- No longer notify user `Updated Frontmatter`.
+- `Snacks.picker` now follow `sort_by` and `sort_reversed` settings.
+- `Note.open` refactor, so that API works as expected.
+
+## [v3.13.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.13.0) - 2025-07-28
+
+### Added
+
+- Allow custom directory and ID logic for templates
+- When filling out a template with user-provided substitution functions, pass a "context" object to each invocation so that users can respond accordingly.
+  - Added `obsidian.InsertTemplateContext` and `obsidian.CloneTemplateContext` as these new "context" objects.
+- Github workflow and `make types` now use `lua-language-server` to check type issues.
+- Added the `completion.create_new` option to allow for disabling new note creation in the picker.
+- Added `makefile types` target to check types via lua-ls.
+- New `obsidian.config` type for user config type check.
+- More informative healthcheck.
+- A guide to embed images for both viewing in neovim and obsidian app: https://github.com/obsidian-nvim/obsidian.nvim/wiki/Images
+- Added `check_buffers` option to `Note.write` and `Note.save` for automatically reloading buffers with `checktime` after writing them to disk
+- Added footer options.
+- Added default mappings: `]o` and `[o`, for navigating links in note.
+- Support pasting image to sub directory in current directory.
+- Reimplement `Obsidian rename` with `vim.lsp`.
+- Support parsing `title` frontmatter property.
+
+### Changed
+
+- Remove `itertools.lua` in favor of `vim.iter`.
+- Commands are now context sensitive (mode and if in note).
+- Remove `debug` command and lazy log functions, and point user to `checkhealth obsidian`.
+- Remove `mappings.lua`, see: <https://github.com/obsidian-nvim/obsidian.nvim/wiki/Keymaps>
+- Moved `daily` as its own module instead of client method.
+- Refactor the `util` module.
+- Refactor several note functionalities from `Client` into `Note`:
+
+  | Client (old)          | Note (new)              |
+  | --------------------- | ----------------------- |
+  | `write_note`          | `write`                 |
+  | `create_note`         | `create`                |
+  | `open_note`           | `open`                  |
+  | `parse_title_id_path` | `resolve_title_id_path` |
+  | `new_note_id`         | `generate_id`           |
+  | `new_note_path`       | `_generate_path`        |
+
+- Refactor `Client:create_note` → `Note:create` and `Client:write_note` → `Note:write`
+- Use `vim.defaulttable` instead of custom impl.
+- Remove the class `obsdian.CallbackManager`, but callback system is not changed.
+- Remove `api.insert_text`, use `vim.api.nvim_put`
+- change `clipboard_is_img` to use `vim.fn.system` instead of `io.popen` to get the output of the command with awareness of the shell variables.
+- use `run_job` wrap with `bash` to run `save_clipboard_image` async for Wayland sessions to avoid data corruption.
+- Use a `Obsidian` global variable to hold the state instead of client.
+- `opts.img_text_func` has an obsidian app compatibility, and only accept one path argument.
+- Moved `client:apply_async` -> `api.dir`
+- Deprecate `statusline` options and `vim.g.obsidian` in favor of `footer` options and `vim.b.obsidian_footer`.
+- Moved `client:switch_workspace` -> `Workspace.switch`
+- Moved `client:follow_link_async` -> `api.follow_link`
+- Moved `client:resolve_note_async` -> `search.resolve_note_async`
+- Moved `client:find_notes_async` -> `search.find_notes_async`
+- `Obsidian toggle_checkbox` will only be triggered in correct context, in `paragraph` and `list` ts nodes.
+- `opts.checkbox.create_new` to configure whether insert new checkbox
+- Don't depend on plenary anymore!
+
+### Fixed
+
+- Fixed improper tmp-file creation during template tests
+- Only error once if template folder is not found.
+- Fixed corrupted text when custom variables appear more than once in a template file (#198)
+- Add further checks to void false positives when finding tags
+- Off-by-one bug when avoiding tag in code blocks
+- Make tag picker case insensitive
+- `ObsidianPasteImg` will now work on Wayland sessions
+- Handle error exit code from git in get_plugin_info
+- Fixed incorrect usage of `Note.create` in `daily_notes`.
+- Fixed tag completion for blink.cmp and improved frontmatter tag handling
+- Fixed to allow numbers in note IDs.
+- Fixed ignore subdirectories specified in `daily_notes.date_format`
+- Fixed not make sure template folder exists.
+- Refactored workspace module for a better api.
+- Fixed types in `opts.workspaces[*].overrides` to all be optional.
+
+## [v3.12.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.12.0) - 2025-06-05
+
+### Added
+
+- Allow users to have a period in the note ID as in a [Johnny.Decimal](https://johnnydecimal.com/) format.
+- Added `make types` target to check types via lua-ls.
+- Added `.github/pull_request_template.md` to make contributing simpler.
+- Added `backlinks` module with the associated `obsidian.config.BacklinkOpts`.
+  - Added `parse_headers` toggle that disables markdown header parsing for `ObsidianBacklinks`.
+- Added `open` module for `Obsidian open` related options.
+- Added autocmd events for user scripting, see [wiki](https://github.com/obsidian-nvim/obsidian.nvim/wiki/Autocmds).
+- Added `opts.ui.ignore_conceal_warn` option to ignore conceal-related warnings.
+- Added `vsplit_force` and `hsplit_force` open strategies. These will always open a vertical/horizontal split if the file is not already in the adjacent split.
+
+### Changed
+
+- Remove `itertools.lua` in favor of `vim.iter`.
+- Configure `foldmethod`, `foldexpr`, and `foldlevel` in ftplugin instead of the BufEnter event. This allows user overrides of these configurations.
+- Remove `fillchars`, `foldtext`, and `smoothscroll` configurations.
+- Refactored `path.lua` to use more functions from `vim.fs`.
+- Relaxed yaml dump quoting condition so that dates are not quoted.
+- Update Stylua version from 0.15.1 → 2.1.0.
+- Use `vim.deprecate` to show deprecate warnings.
+- Deprecate `open_app_foreground`.
+- Remove most `plenary.nvim` usage.
+- Use `io` functions instead of `File` class
+
+### Fixed
+
+- Allow multiword note title in `new_from_template`.
+- Allow `@` in urls to better open youtube links.
+- Fixed types in `_snacks.lua`.
+- Fixed command documentation.
+- Fixed compatibility issue in using `vim.fs`
+- Fixed default open func
+
+## [v3.11.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.11.0) - 2025-05-04
+
 ### Added
 
 - Added a statusline component provider similar to Obsidian app.
@@ -25,6 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved type annotations for user commands: add `CommandArgs` type.
 - `follow_url_func` and `follow_img_func` defaults to `vim.ui.open`
 - `smart_action` now can also toggle heading folds.
+- `Obsidian new_from_template` accepts an optional `TEMPLATE` argument.
 
 ### Fixed
 
@@ -33,6 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `<C-x>` not working after command merging
 - Fixed `blink.cmp` new notes source completion not working properly
 - Fixed `blink.cmp` off by one insert start position
+- Fixed `ObsidianNew`, `ObsidianRename`, and `ObsidianPasteImg` not to evaluate backticked substrings in its arguments, disabling `-complete=file`
 
 ## [v3.10.0](https://github.com/obsidian-nvim/obsidian.nvim/releases/tag/v3.10.0) - 2025-04-12
 
@@ -51,9 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default to not activate ui render when `render-markdown.nvim` or `markview.nvim` is present
 - `smart_action` shows picker for tags (`ObsidianTag`) when cursor is on a tag
 - `ObsidianToggleCheckbox` now works with numbered lists
-
-- # `Makefile` is friendlier: self-documenting and automatically gets dependencies
-
+- `Makefile` is friendlier: self-documenting and automatically gets dependencies
 - Default to not activate ui render when `render-markdown.nvim` or `markview.nvim` is present.
 
 ### Fixed
@@ -233,7 +355,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 There's a lot of new features and improvements here that I'm really excited about 🥳 They've improved my workflow a ton and I hope they do for you too. To highlight the 3 biggest additions:
 
 1. 🔗 Full support for header anchor links and block links! That means both for following links and completion of links. Various forms of anchor/block links are support. Here are a few examples:
-
    - Typical Obsidian-style wiki links, e.g. `[[My note#Heading 1]]`, `[[My note#Heading 1#Sub heading]]`, `[[My note#^block-123]]`.
    - Wiki links with a label, e.g. `[[my-note#heading-1|Heading 1 in My Note]]`.
    - Markdown links, e.g. `[Heading 1 in My Note](my-note.md#heading-1)`.

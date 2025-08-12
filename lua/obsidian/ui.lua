@@ -2,8 +2,7 @@ local abc = require "obsidian.abc"
 local util = require "obsidian.util"
 local log = require "obsidian.log"
 local search = require "obsidian.search"
-local DefaultTbl = require("obsidian.collections").DefaultTbl
-local iter = require("obsidian.itertools").iter
+local iter = vim.iter
 
 local M = {}
 
@@ -21,7 +20,7 @@ end
 -- For example, "󰄱" is turned into "1\1\15".
 -- TODO: if we knew how to un-mangle the conceal char we wouldn't need the cache.
 
-M._buf_mark_cache = DefaultTbl.new(DefaultTbl.with_tbl)
+M._buf_mark_cache = vim.defaulttable()
 
 ---@param bufnr integer
 ---@param ns_id integer
@@ -188,8 +187,7 @@ end
 ---@return ExtMark[]
 local function get_line_check_extmarks(marks, line, lnum, ui_opts)
   for char, opts in pairs(ui_opts.checkboxes) do
-    -- TODO: escape `char` if needed
-    if string.match(line, "^%s*- %[" .. util.escape_magic_characters(char) .. "%]") then
+    if string.match(line, "^%s*- %[" .. vim.pesc(char) .. "%]") then
       local indent = util.count_indent(line)
       marks[#marks + 1] = ExtMark.new(
         nil,
@@ -487,12 +485,12 @@ end
 ---@param bufnr integer
 ---@param ui_opts obsidian.config.UIOpts
 local function update_extmarks(bufnr, ns_id, ui_opts)
-  local start_time = vim.loop.hrtime()
+  local start_time = vim.uv.hrtime()
   local n_marks_added = 0
   local n_marks_cleared = 0
 
   -- Collect all current marks, grouped by line.
-  local cur_marks_by_line = DefaultTbl.with_tbl()
+  local cur_marks_by_line = vim.defaulttable()
   for mark in iter(ExtMark.collect(bufnr, ns_id)) do
     local cur_line_marks = cur_marks_by_line[mark.row]
     cur_line_marks[#cur_line_marks + 1] = mark
@@ -526,7 +524,7 @@ local function update_extmarks(bufnr, ns_id, ui_opts)
       if #new_line_marks > 0 then
         -- Materialize new marks.
         for mark in iter(new_line_marks) do
-          if not util.tbl_contains(cur_line_marks, mark) then
+          if not vim.list_contains(cur_line_marks, mark) then
             mark:materialize(bufnr, ns_id)
             n_marks_added = n_marks_added + 1
           end
@@ -534,7 +532,7 @@ local function update_extmarks(bufnr, ns_id, ui_opts)
 
         -- Clear old marks.
         for mark in iter(cur_line_marks) do
-          if not util.tbl_contains(new_line_marks, mark) then
+          if not vim.list_contains(new_line_marks, mark) then
             mark:clear(bufnr, ns_id)
             n_marks_cleared = n_marks_cleared + 1
           end
@@ -549,7 +547,7 @@ local function update_extmarks(bufnr, ns_id, ui_opts)
     end
   end
 
-  local runtime = math.floor((vim.loop.hrtime() - start_time) / 1000000)
+  local runtime = math.floor((vim.uv.hrtime() - start_time) / 1000000)
   log.debug("Added %d new marks, cleared %d old marks in %dms", n_marks_added, n_marks_cleared, runtime)
 end
 
@@ -595,10 +593,11 @@ local function get_extmarks_autocmd_callback(ui_opts, throttle)
 end
 
 ---Manually update extmarks.
----@param ui_opts obsidian.config.UIOpts
+---
 ---@param bufnr integer|?
-M.update = function(ui_opts, bufnr)
+M.update = function(bufnr)
   bufnr = bufnr or 0
+  local ui_opts = Obsidian.opts.ui
   if not should_update(ui_opts, bufnr) then
     return
   end
@@ -625,7 +624,7 @@ M.setup = function(workspace, ui_opts)
     callback = function()
       local conceallevel = vim.opt_local.conceallevel:get()
 
-      if conceallevel < 1 or conceallevel > 2 then
+      if (conceallevel < 1 or conceallevel > 2) and not ui_opts.ignore_conceal_warn then
         log.warn_once(
           "Obsidian additional syntax features require 'conceallevel' to be set to 1 or 2, "
             .. "but you have 'conceallevel' set to '%s'.\n"

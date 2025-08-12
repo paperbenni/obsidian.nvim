@@ -1,5 +1,6 @@
 local util = require "obsidian.util"
-local iter = require("obsidian.itertools").iter
+local search = require "obsidian.search"
+local iter = vim.iter
 
 local command_lookups = {
   ObsidianCheck = "obsidian.commands.check",
@@ -24,7 +25,6 @@ local command_lookups = {
   ObsidianRename = "obsidian.commands.rename",
   ObsidianPasteImg = "obsidian.commands.paste_img",
   ObsidianExtractNote = "obsidian.commands.extract_note",
-  ObsidianDebug = "obsidian.commands.debug",
   ObsidianTOC = "obsidian.commands.toc",
 }
 
@@ -44,14 +44,14 @@ local M = setmetatable({
   end,
 })
 
----@class obsidian.CommandConfig
+---@class obsidian.CommandConfigLegacy
 ---@field opts table
 ---@field complete function|?
 ---@field func function|? (obsidian.Client, table) -> nil
 
 ---Register a new command.
 ---@param name string
----@param config obsidian.CommandConfig
+---@param config obsidian.CommandConfigLegacy
 M.register = function(name, config)
   if not config.func then
     config.func = function(client, data)
@@ -111,14 +111,14 @@ M.complete_args_search = function(client, _, cmd_line, _)
 
   local completions = {}
   local query_lower = string.lower(query)
-  for note in iter(client:find_notes(query, { search = { sort = true } })) do
-    local note_path = assert(client:vault_relative_path(note.path, { strict = true }))
+  for note in iter(search.find_notes(query, { search = { sort = true } })) do
+    local note_path = assert(note.path:vault_relative_path { strict = true })
     if string.find(string.lower(note:display_name()), query_lower, 1, true) then
-      table.insert(completions, note:display_name() .. "  " .. note_path)
+      table.insert(completions, note:display_name() .. "  " .. tostring(note_path))
     else
       for _, alias in pairs(note.aliases) do
         if string.find(string.lower(alias), query_lower, 1, true) then
-          table.insert(completions, alias .. "  " .. note_path)
+          table.insert(completions, alias .. "  " .. tostring(note_path))
           break
         end
       end
@@ -138,7 +138,7 @@ M.register("ObsidianTomorrow", { opts = { nargs = 0, desc = "Open the daily note
 
 M.register("ObsidianDailies", { opts = { nargs = "*", desc = "Open a picker with daily notes" } })
 
-M.register("ObsidianNew", { opts = { nargs = "?", complete = "file", desc = "Create a new note" } })
+M.register("ObsidianNew", { opts = { nargs = "?", desc = "Create a new note" } })
 
 M.register(
   "ObsidianOpen",
@@ -153,7 +153,7 @@ M.register("ObsidianSearch", { opts = { nargs = "?", desc = "Search vault" } })
 
 M.register("ObsidianTemplate", { opts = { nargs = "?", desc = "Insert a template" } })
 
-M.register("ObsidianNewFromTemplate", { opts = { nargs = "?", desc = "Create a new note from a template" } })
+M.register("ObsidianNewFromTemplate", { opts = { nargs = "*", desc = "Create a new note from a template" } })
 
 M.register("ObsidianQuickSwitch", { opts = { nargs = "?", desc = "Switch notes" } })
 
@@ -172,22 +172,14 @@ M.register("ObsidianToggleCheckbox", { opts = { nargs = 0, desc = "Toggle checkb
 
 M.register("ObsidianWorkspace", { opts = { nargs = "?", desc = "Check or switch workspace" } })
 
-M.register(
-  "ObsidianRename",
-  { opts = { nargs = "?", complete = "file", desc = "Rename note and update all references to it" } }
-)
+M.register("ObsidianRename", { opts = { nargs = "?", desc = "Rename note and update all references to it" } })
 
-M.register(
-  "ObsidianPasteImg",
-  { opts = { nargs = "?", complete = "file", desc = "Paste an image from the clipboard" } }
-)
+M.register("ObsidianPasteImg", { opts = { nargs = "?", desc = "Paste an image from the clipboard" } })
 
 M.register(
   "ObsidianExtractNote",
   { opts = { nargs = "?", range = true, desc = "Extract selected text to a new note and link to it" } }
 )
-
-M.register("ObsidianDebug", { opts = { nargs = 0, desc = "Log some information for debugging" } })
 
 M.register("ObsidianTOC", { opts = { nargs = 0, desc = "Load the table of contents into a picker" } })
 

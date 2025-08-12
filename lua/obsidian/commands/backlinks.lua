@@ -1,15 +1,16 @@
 local util = require "obsidian.util"
 local log = require "obsidian.log"
 local RefTypes = require("obsidian.search").RefTypes
+local api = require "obsidian.api"
+local search = require "obsidian.search"
 
----@param client obsidian.Client
 ---@param picker obsidian.Picker
 ---@param note obsidian.Note
 ---@param opts { anchor: string|?, block: string|? }|?
-local function collect_backlinks(client, picker, note, opts)
+local function collect_backlinks(picker, note, opts)
   opts = opts or {}
 
-  client:find_backlinks_async(note, function(backlinks)
+  search.find_backlinks_async(note, function(backlinks)
     if vim.tbl_isempty(backlinks) then
       if opts.anchor then
         log.info("No backlinks found for anchor '%s' in note '%s'", opts.anchor, note.id)
@@ -22,14 +23,13 @@ local function collect_backlinks(client, picker, note, opts)
     end
 
     local entries = {}
-    for _, matches in ipairs(backlinks) do
-      for _, match in ipairs(matches.matches) do
-        entries[#entries + 1] = {
-          value = { path = matches.path, line = match.line },
-          filename = tostring(matches.path),
-          lnum = match.line,
-        }
-      end
+
+    for _, backlink in ipairs(backlinks) do
+      entries[#entries + 1] = {
+        value = { path = backlink.path, line = backlink.line },
+        filename = tostring(backlink.path),
+        lnum = backlink.line,
+      }
     end
 
     ---@type string
@@ -46,29 +46,31 @@ local function collect_backlinks(client, picker, note, opts)
       picker:pick(entries, {
         prompt_title = prompt_title,
         callback = function(value)
-          util.open_buffer(value.path, { line = value.line })
+          api.open_buffer(value.path, { line = value.line })
         end,
       })
     end)
-  end, { search = { sort = true }, anchor = opts.anchor, block = opts.block })
+  end, { search = { sort = true, anchor = opts.anchor, block = opts.block } })
 end
 
----@param client obsidian.Client
-return function(client)
-  local picker = assert(client:picker())
+return function()
+  local picker = assert(Obsidian.picker)
   if not picker then
     log.err "No picker configured"
     return
   end
 
-  local location, _, ref_type = util.parse_cursor_link { include_block_ids = true }
+  local cur_link, link_type = api.cursor_link()
 
   if
-    location ~= nil
-    and ref_type ~= RefTypes.NakedUrl
-    and ref_type ~= RefTypes.FileUrl
-    and ref_type ~= RefTypes.BlockID
+    cur_link ~= nil
+    and link_type ~= RefTypes.NakedUrl
+    and link_type ~= RefTypes.FileUrl
+    and link_type ~= RefTypes.BlockID
   then
+    local location = util.parse_link(cur_link, { include_block_ids = true })
+    assert(location, "cursor on a link but failed to parse, please report to repo")
+
     -- Remove block links from the end if there are any.
     -- TODO: handle block links.
     ---@type string|?
@@ -87,24 +89,11 @@ return function(client)
 
     local opts = { anchor = anchor_link, block = block_link }
 
-    client:resolve_note_async(location, function(...)
-      ---@type obsidian.Note[]
-      local notes = { ... }
-
-      if #notes == 0 then
-        log.err("No notes matching '%s'", location)
-        return
-      elseif #notes == 1 then
-        return collect_backlinks(client, picker, notes[1], opts)
+    search.resolve_note_async(location, function(note)
+      if not note then
+        return log.err("No notes matching '%s'", location)
       else
-        return vim.schedule(function()
-          picker:pick_note(notes, {
-            prompt_title = "Select note",
-            callback = function(note)
-              collect_backlinks(client, picker, note, opts)
-            end,
-          })
-        end)
+        return collect_backlinks(picker, note, opts)
       end
     end)
   else
@@ -113,24 +102,26 @@ return function(client)
     ---@type obsidian.note.LoadOpts
     local load_opts = {}
 
-    if ref_type == RefTypes.BlockID then
-      opts.block = location
+    if cur_link and link_type == RefTypes.BlockID then
+      opts.block = util.parse_link(cur_link, { include_block_ids = true })
     else
       load_opts.collect_anchor_links = true
     end
 
-    local note = client:current_note(0, load_opts)
+    local note = api.current_note(0, load_opts)
 
-    -- Check if cursor is on a header, if so, use that anchor.
-    local header_match = util.parse_header(vim.api.nvim_get_current_line())
-    if header_match then
-      opts.anchor = header_match.anchor
+    -- Check if cursor is on a header, if so and header parsing is enabled, use that anchor.
+    if Obsidian.opts.backlinks.parse_headers then
+      local header_match = util.parse_header(vim.api.nvim_get_current_line())
+      if header_match then
+        opts.anchor = header_match.anchor
+      end
     end
 
     if note == nil then
       log.err "Current buffer does not appear to be a note inside the vault"
     else
-      collect_backlinks(client, picker, note, opts)
+      collect_backlinks(picker, note, opts)
     end
   end
 end

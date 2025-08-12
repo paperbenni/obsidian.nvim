@@ -4,9 +4,16 @@ std = luajit
 codes = true
 self = false
 
+include_files = {
+  "lua/obsidian/*",
+  "tests/*",
+}
+
 exclude_files = {
   "_neovim/*",
   "_runtime/*",
+  "deps/*",
+  "tests/fixtures",
 }
 
 -- Glorious list of warnings: https://luacheck.readthedocs.io/en/stable/warnings.html
@@ -18,6 +25,12 @@ ignore = {
 
 -- Global objects defined by the C code
 read_globals = {
+  "Obsidian",
   "vim",
   "MiniDoc",
+  "MiniTest",
+  "it",
+  "describe",
+  "before_each",
+  "after_each",
 }

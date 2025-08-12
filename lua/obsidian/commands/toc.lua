@@ -1,9 +1,8 @@
 local util = require "obsidian.util"
+local api = require "obsidian.api"
 
----@param client obsidian.Client
----@param _ CommandArgs
-return function(client, _)
-  local note = assert(client:current_note(0, { collect_anchor_links = true }))
+return function()
+  local note = assert(api.current_note(0, { collect_anchor_links = true }))
 
   ---@type obsidian.PickerEntry[]
   local picker_entries = {}
@@ -21,6 +20,6 @@ return function(client, _)
     return a.lnum < b.lnum
   end)
 
-  local picker = assert(client:picker())
+  local picker = assert(Obsidian.picker)
   picker:pick(picker_entries, { prompt_title = "Table of Contents" })
 end
